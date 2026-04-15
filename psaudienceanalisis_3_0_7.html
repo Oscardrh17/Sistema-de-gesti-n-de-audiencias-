@@ -1,0 +1,3374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>PlayStation Audience Analysis</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{margin:0;font-family:'Orbitron',sans-serif;background:white;color:#003791;}
+section{display:none;padding:40px;}
+button{padding:14px 28px;border:none;border-radius:14px;background:#003791;color:white;font-weight:600;cursor:pointer;margin:10px;}
+button:hover{background:#0070D1;}
+h1{text-align:center;}
+
+#inicio{display:flex;justify-content:center;align-items:center;height:100vh;background:linear-gradient(135deg,#003791,#0070D1);color:white;}
+#inicio .box{background:rgba(255,255,255,.1);padding:60px;border-radius:20px;text-align:center;}
+
+.menu{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:700px;margin:auto;}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:15px;margin-top:20px;}
+.card{background:#0070D1;padding:15px;border-radius:15px;color:white;cursor:pointer;font-weight:600;text-align:center;min-height:80px;display:flex;align-items:center;justify-content:center;}
+.card:hover{background:#00A8E8;}
+
+.popup{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);justify-content:center;align-items:center;z-index:1000;}
+.popup-content{background:white;width:85%;max-height:90%;overflow:auto;padding:25px;border-radius:20px;}
+.close{float:right;font-size:20px;cursor:pointer;}
+
+.bar{height:22px;background:#0070D1;margin:6px 0;border-radius:10px;padding-left:8px;color:white;font-size:.8rem;display:flex;align-items:center;}
+.bar.mini{height:18px;font-size:.75rem;opacity:.95}
+
+.test-box{max-width:600px;margin:auto;background:#f2f6ff;padding:30px;border-radius:20px;text-align:center;}
+.option{background:#0070D1;color:white;padding:12px;border-radius:10px;margin:10px 0;cursor:pointer;}
+.option:hover{background:#00A8E8;}
+
+.manual-box{max-width:1000px;margin:auto;background:#f2f6ff;padding:30px;border-radius:20px;}
+.small{font-size:.9rem;opacity:.9}
+hr{border:none;border-top:1px solid #d7e2ff;margin:18px 0;}
+
+.analysis-grid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:18px;
+}
+.panel{
+  background:white;
+  border:1px solid #d7e2ff;
+  border-radius:20px;
+  padding:20px;
+  box-shadow:0 10px 25px rgba(0,55,145,.08);
+}
+.panel h2{margin:0 0 10px 0;}
+.panel p{margin:8px 0;}
+.panel .cta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
+
+.badge{
+  display:inline-block;
+  padding:6px 10px;
+  border-radius:999px;
+  background:#003791;
+  color:white;
+  font-size:.85rem;
+  margin-right:8px;
+}
+.kpi{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
+.kpi .kpi-card{background:#f2f6ff;border-radius:16px;padding:12px;}
+.kpi .kpi-card b{display:block;margin-bottom:4px;}
+.mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+
+.selectRow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
+select{
+  padding:12px 14px;border-radius:14px;border:1px solid #d7e2ff;
+  font-family:'Orbitron',sans-serif;color:#003791;background:white;
+}
+select:focus{outline:none;box-shadow:0 0 0 3px rgba(0,112,209,.15)}
+
+.engagement-box{max-width:1100px;margin:auto;background:#f2f6ff;padding:30px;border-radius:20px;}
+.engagement-controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:25px;}
+.engagement-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin:20px 0;}
+.eng-card{background:white;border-radius:18px;padding:18px;box-shadow:0 8px 20px rgba(0,55,145,.08);border:1px solid #d7e2ff;}
+.eng-card h4{margin:0 0 8px 0;font-size:.9rem;}
+.eng-card p{margin:0;font-size:1.2rem;font-weight:700;color:#003791;}
+.chart-wrap{background:white;border-radius:20px;padding:20px;border:1px solid #d7e2ff;}
+#engagementChart{width:100%;height:380px;}
+#clScatterChart{width:100%!important;height:380px!important;}
+#generalEngagementChart{width:100%;height:420px;}
+.engagement-summary{background:white;border-radius:20px;padding:20px;border:1px solid #d7e2ff;margin-top:20px;}
+.general-panel{background:white;border-radius:20px;padding:20px;border:1px solid #d7e2ff;margin-top:20px;}
+.chart-scroll{overflow-x:auto;}
+.chart-inner{min-width:1600px;}
+
+.channel-box{max-width:1200px;margin:auto;background:#f2f6ff;padding:30px;border-radius:20px;}
+.channel-controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:20px;}
+.channel-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin:20px 0;}
+.channel-card{background:white;border-radius:18px;padding:18px;box-shadow:0 8px 20px rgba(0,55,145,.08);border:1px solid #d7e2ff;}
+.channel-card h4{margin:0 0 8px 0;font-size:.9rem;}
+.channel-card p{margin:0;font-size:1.15rem;font-weight:700;color:#003791;}
+.channel-grid{display:grid;grid-template-columns:1.25fr .95fr;gap:20px;margin-top:20px;}
+.channel-table-wrap,.channel-chart-wrap,.channel-insight{background:white;border-radius:20px;padding:20px;border:1px solid #d7e2ff;}
+.channel-table{width:100%;border-collapse:collapse;font-size:.92rem;}
+.channel-table th,.channel-table td{padding:12px 10px;border-bottom:1px solid #d7e2ff;text-align:left;vertical-align:middle;}
+.channel-table th{font-size:.82rem;text-transform:uppercase;letter-spacing:.04em;color:#003791;}
+.channel-table tr:hover{background:#f8fbff;}
+.risk-pill{display:inline-block;padding:5px 10px;border-radius:999px;font-size:.78rem;font-weight:700;}
+.risk-low{background:#dff6e7;color:#0b6b2f;}
+.risk-mid{background:#fff3cd;color:#8a6700;}
+.risk-high{background:#fde2e2;color:#a61b1b;}
+#channelReachChart{width:100%;height:600px;max-height:600px;}
+.channel-frontier-copy{margin-top:16px;padding:18px;border-radius:16px;background:#f8fbff;border:1px solid #d7e2ff;line-height:1.6;}
+.channel-frontier-copy h4{margin:0 0 10px 0;}
+.channel-frontier-copy p{margin:8px 0;}
+.channel-frontier-copy ul{margin:10px 0 0 18px;padding:0;}
+.channel-frontier-copy li{margin:8px 0;}
+.channel-insight ul{margin:10px 0 0 18px;padding:0;}
+.channel-insight li{margin:8px 0;}
+
+@media(max-width:1100px){
+  .grid{grid-template-columns:repeat(4,1fr);}
+}
+@media(max-width:900px){
+  .engagement-cards{grid-template-columns:repeat(2,1fr);}
+  .channel-cards{grid-template-columns:repeat(2,1fr);}
+  .channel-grid{grid-template-columns:1fr;}
+  .grid{grid-template-columns:repeat(3,1fr);}
+}
+@media(max-width:700px){
+  .grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:560px){
+  .engagement-cards{grid-template-columns:1fr;}
+  .channel-cards{grid-template-columns:1fr;}
+  .grid{grid-template-columns:1fr;}
+}
+/* ── CLUSTERING MODULE ─────────────────────────────────────── */
+.cl-box{max-width:1200px;margin:auto;background:#f2f6ff;padding:30px;border-radius:20px;}
+.cl-step{background:white;border-radius:18px;padding:22px;border:1px solid #d7e2ff;margin-bottom:18px;box-shadow:0 6px 18px rgba(0,55,145,.07);}
+.cl-step h3{margin:0 0 12px;color:#003791;font-size:1rem;}
+.cl-row{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:10px;}
+.cl-input{padding:11px 14px;border-radius:12px;border:1px solid #d7e2ff;font-family:'Orbitron',sans-serif;color:#003791;background:white;font-size:.85rem;flex:1;min-width:200px;}
+.cl-input:focus{outline:none;box-shadow:0 0 0 3px rgba(0,112,209,.18);}
+.cl-label{font-size:.82rem;color:#003791;font-weight:600;white-space:nowrap;}
+.cl-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px;}
+.cl-kpi{background:white;border-radius:16px;padding:14px 12px;border:1px solid #d7e2ff;text-align:center;}
+.cl-kpi b{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:#6688bb;margin-bottom:6px;}
+.cl-kpi span{font-size:1.3rem;font-weight:700;color:#003791;}
+.cl-grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;}
+.cl-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-bottom:18px;}
+.cl-chart-wrap{background:white;border-radius:18px;padding:18px;border:1px solid #d7e2ff;}
+.cl-chart-wrap h4{margin:0 0 12px;font-size:.9rem;color:#003791;}
+.cl-seg-list{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px;}
+.cl-seg-card{background:white;border-radius:16px;padding:16px;border:2px solid #d7e2ff;cursor:pointer;transition:all .2s;}
+.cl-seg-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,55,145,.14);}
+.cl-seg-card.selected{border-width:2px;background:#f0f8ff;}
+.cl-seg-card .seg-name{font-weight:700;font-size:.85rem;margin-bottom:6px;}
+.cl-seg-card .seg-meta{font-size:.75rem;color:#6688bb;margin-bottom:4px;}
+.cl-seg-card .seg-bar-row{display:flex;align-items:center;gap:6px;margin:3px 0;font-size:.7rem;}
+.cl-seg-card .seg-bar-bg{flex:1;height:5px;background:#e8eef8;border-radius:3px;overflow:hidden;}
+.cl-seg-card .seg-bar-fill{height:100%;border-radius:3px;}
+.cl-drilldown{background:white;border-radius:18px;padding:22px;border:1px solid #d7e2ff;display:none;}
+.cl-drilldown.visible{display:block;}
+.cl-drill-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+.cl-drill-title{font-size:1.1rem;font-weight:700;color:#003791;}
+.cl-drill-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.cl-stat-table{width:100%;border-collapse:collapse;font-size:.82rem;}
+.cl-stat-table th{background:#f2f6ff;padding:8px 10px;text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:#6688bb;border-bottom:1px solid #d7e2ff;}
+.cl-stat-table td{padding:8px 10px;border-bottom:1px solid #f0f4fb;vertical-align:middle;}
+.cl-stat-table tr:hover td{background:#f8fbff;}
+.cl-z-pill{display:inline-block;padding:2px 7px;border-radius:999px;font-size:.7rem;font-weight:700;}
+.cl-z-high{background:#dbeafe;color:#1d4ed8;}
+.cl-z-low{background:#fde8e8;color:#b91c1c;}
+.cl-z-mid{background:#f0fdf4;color:#15803d;}
+.cl-insight-box{background:#f0f8ff;border-radius:12px;padding:14px;font-size:.82rem;line-height:1.6;border:1px solid #d7e2ff;}
+.cl-insight-box h4{margin:0 0 8px;font-size:.85rem;}
+.cl-insight-box li{margin:5px 0;}
+.cl-strategy{background:#003791;color:white;border-radius:14px;padding:16px;font-size:.82rem;line-height:1.6;margin-top:8px;}
+.cl-strategy b{display:block;margin-bottom:6px;font-size:.9rem;}
+.cl-log{background:#001a3a;color:#7ab8ff;font-family:monospace;font-size:.75rem;border-radius:12px;padding:14px;max-height:160px;overflow-y:auto;margin-top:10px;line-height:1.7;}
+.cl-users-table{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:10px;}
+.cl-users-table th{background:#f2f6ff;padding:7px 8px;text-align:left;font-size:.7rem;color:#6688bb;border-bottom:1px solid #d7e2ff;}
+.cl-users-table td{padding:7px 8px;border-bottom:1px solid #f0f4fb;}
+.cl-badge-anom{background:#fde8e8;color:#b91c1c;padding:3px 8px;border-radius:999px;font-size:.72rem;font-weight:700;}
+.cl-badge-ok{background:#dbeafe;color:#1d4ed8;padding:3px 8px;border-radius:999px;font-size:.72rem;font-weight:700;}
+.cl-progress{height:6px;background:#e8eef8;border-radius:3px;overflow:hidden;margin-top:4px;}
+.cl-progress-fill{height:100%;border-radius:3px;transition:width .6s ease;}
+@media(max-width:900px){
+  .cl-kpis{grid-template-columns:repeat(3,1fr);}
+  .cl-grid2,.cl-drill-grid{grid-template-columns:1fr;}
+  .cl-grid3,.cl-seg-list{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:560px){
+  .cl-kpis{grid-template-columns:1fr 1fr;}
+  .cl-seg-list{grid-template-columns:1fr;}
+}
+</style>
+</head>
+
+<body>
+
+<section id="inicio">
+  <div class="box">
+    <h1>PlayStation Audience Analysis</h1>
+    <button onclick="showSection('menu')">Continuar</button>
+  </div>
+</section>
+
+<section id="menu">
+  <h1>Menú</h1>
+  <div class="menu">
+    <button onclick="showSection('library')">Audience Library</button>
+    <button onclick="showSection('mbti')">Test MBTI</button>
+    <button onclick="showSection('analysis')">Análisis</button>
+    <button onclick="showSection('engagement')">Índice de engagement</button>
+    <button onclick="showSection('channels')">Gestión de publicidad</button>
+    <button onclick="showSection('clustering')">🔬 Clustering DBSCAN</button>
+    <button onclick="showSection('manual')">Instrucciones de uso</button>
+    <button onclick="showSection('inicio')">Regresar</button>
+  </div>
+</section>
+
+<section id="library">
+  <h1>Audience Library</h1>
+  <button onclick="showSection('menu')">Volver</button>
+  <div class="grid" id="audienceGrid"></div>
+</section>
+
+<div class="popup" id="popup">
+  <div class="popup-content">
+    <span class="close" onclick="closePopup()">X</span>
+    <div id="popupData"></div>
+  </div>
+</div>
+
+<section id="mbti">
+  <h1>Test MBTI</h1>
+  <button onclick="showSection('menu')">Volver</button>
+  <div class="test-box">
+    <h2 id="question"></h2>
+    <div id="options"></div>
+  </div>
+</section>
+
+<section id="analysis">
+  <h1>Análisis de audiencia</h1>
+  <button onclick="showSection('menu')">Volver</button>
+
+  <div class="manual-box">
+    <div class="analysis-grid">
+
+      <div class="panel" id="awarenessPanel">
+        <h2>PlayStation Audience Intelligence</h2>
+        <p>Analiza el comportamiento real de los jugadores<br>
+        y descubre oportunidades para tu estrategia<br>
+        de marketing y contenido.</p>
+
+        <div class="selectRow">
+          <span class="badge">🎛️ Elegir audiencia</span>
+          <select id="audienceSelect" onchange="setSelectedAudience(this.value)"></select>
+          <button onclick="startAnalysisFlow()">Comenzar análisis</button>
+        </div>
+
+        <p class="small">Tip: puedes analizar <b>una audiencia específica</b> o la <b>dominante</b> según tus datos.</p>
+      </div>
+
+      <div class="panel" id="kpiPanel">
+        <h3>Resumen rápido</h3>
+        <p id="totalUsers"></p>
+
+        <div class="kpi">
+          <div class="kpi-card">
+            <b>Audiencia seleccionada</b>
+            <span id="selectedAudienceName">—</span>
+          </div>
+          <div class="kpi-card">
+            <b>Participación en el total</b>
+            <span id="selectedAudienceShare">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="distributionPanel">
+        <h3>Distribución de audiencias</h3>
+        <div id="analysisData"></div>
+      </div>
+
+      <div class="panel" id="conversionPanel">
+        <h2>Conversión</h2>
+        <p>Acción clave del funnel:</p>
+        <p class="small">✔ Generar reporte de audiencia<br>
+           ✔ Descargar insights<br>
+           ✔ Guardar perfil de audiencia</p>
+
+        <div class="cta-row">
+          <button onclick="generateAudienceReport()">Generar reporte de audiencia</button>
+          <button onclick="downloadLastReport()">Descargar insights</button>
+        </div>
+
+        <p class="small">El reporte se genera usando la audiencia <b>seleccionada</b> (o dominante si eliges esa opción).</p>
+      </div>
+
+      <div class="panel" id="retentionPanel">
+        <h2>Retención</h2>
+        <p><span class="badge">🎯 Audiencia en análisis</span> <b id="detectedAudienceTitle">—</b></p>
+
+        <div id="retentionDetails" class="small">Selecciona una audiencia arriba y presiona “Comenzar análisis”.</div>
+
+        <div class="cta-row">
+          <button onclick="saveSelectedProfile()">Guardar perfil</button>
+          <button onclick="createCampaignFromProfile()">Crear campaña basada en esta audiencia</button>
+        </div>
+      </div>
+
+      <div class="panel" id="reportPanel">
+        <h2>Reporte</h2>
+        <div id="reportOutput" class="mono small">Aún no hay reporte generado.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section id="engagement">
+  <h1>Índice de engagement</h1>
+  <button onclick="showSection('menu')">Volver</button>
+
+  <div class="engagement-box">
+    <div class="engagement-controls">
+      <span class="badge">Selecciona una audiencia</span>
+      <select id="engagementAudienceSelect"></select>
+    </div>
+
+    <div class="engagement-cards">
+      <div class="eng-card">
+        <h4>Engagement Rate</h4>
+        <p id="engRate">--</p>
+      </div>
+
+      <div class="eng-card">
+        <h4>CTR estimado</h4>
+        <p id="engCTR">--</p>
+      </div>
+
+      <div class="eng-card">
+        <h4>Tiempo medio de juego</h4>
+        <p id="engTime">--</p>
+      </div>
+
+      <div class="eng-card">
+        <h4>Retención</h4>
+        <p id="engRetention">--</p>
+      </div>
+    </div>
+
+    <div class="chart-wrap">
+      <canvas id="engagementChart"></canvas>
+    </div>
+
+    <div class="engagement-summary">
+      <p id="engagementSummaryText">Selecciona una audiencia para ver su índice de engagement.</p>
+    </div>
+
+    <div class="general-panel">
+      <h3>General</h3>
+      <p class="small">Comparación consolidada del engagement de todas las audiencias en una sola gráfica.</p>
+      <div class="chart-scroll">
+        <div class="chart-inner">
+          <canvas id="generalEngagementChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section id="channels">
+  <h1>Gestión de publicidad</h1>
+  <button onclick="showSection('menu')">Volver</button>
+
+  <div class="channel-box">
+    <div class="channel-controls">
+      <span class="badge">Selecciona una audiencia</span>
+      <select id="channelAudienceSelect"></select>
+    </div>
+
+    <div class="channel-cards">
+      <div class="channel-card">
+        <h4>Canal líder por alcance</h4>
+        <p id="topChannelName">--</p>
+      </div>
+
+      <div class="channel-card">
+        <h4>Alcance total estimado</h4>
+        <p id="channelTotalReach">--</p>
+      </div>
+
+      <div class="channel-card">
+        <h4>Frecuencia promedio</h4>
+        <p id="channelAvgFrequency">--</p>
+      </div>
+
+      <div class="channel-card">
+        <h4>Engagement promedio</h4>
+        <p id="channelAvgEngaged">--</p>
+      </div>
+    </div>
+
+    <div class="channel-grid">
+      <div class="channel-table-wrap">
+        <h3>Detalle por canal</h3>
+        <table class="channel-table">
+          <thead>
+            <tr>
+              <th>Canal</th>
+              <th>Alcance</th>
+              <th>Piezas</th>
+              <th>Frecuencia</th>
+              <th>Audiencia enganchada</th>
+              <th>Riesgo</th>
+            </tr>
+          </thead>
+          <tbody id="channelMetricsTable"></tbody>
+        </table>
+      </div>
+
+      <div class="channel-insight">
+        <h3>Lectura ejecutiva</h3>
+        <p id="channelInsightText">Selecciona una audiencia para ver el desempeño estimado por canal.</p>
+        <ul id="channelInsightList"></ul>
+      </div>
+    </div>
+
+    <div class="channel-chart-wrap">
+      <canvas id="channelReachChart"></canvas>
+      <div class="channel-frontier-copy">
+        <p id="channelFrontierSummary">Selecciona una audiencia para ver qué canales quedan más cerca de la frontera eficiente y cuál sería la combinación ideal entre retorno esperado y riesgo.</p>
+        <ul id="channelFrontierBullets"></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="manual">
+  <h1>Instrucciones de uso</h1>
+  <button onclick="showSection('menu')">Volver</button>
+  <div class="manual-box">
+    <h3>¿Qué hace esta página?</h3>
+    <p>
+      Esta plataforma simula un sistema de <b>inteligencia de audiencias</b>:
+      el usuario completa un test MBTI y el sistema incrementa contadores por segmento.
+      Luego, en <b>Análisis</b>, puedes explorar distribución, generar reportes, guardar perfiles y crear borradores de campañas.
+    </p>
+
+    <hr>
+
+    <h3>1) Menú</h3>
+    <ul>
+      <li><b>Audience Library:</b> catálogo de audiencias. Cada tarjeta muestra el total de usuarios asignados a ese perfil.</li>
+      <li><b>Test MBTI:</b> cuestionario de 4 preguntas. Al finalizar, asigna un perfil y suma 1 usuario a esa audiencia.</li>
+      <li><b>Análisis:</b> embudo (Awareness → Conversion → Retention) para convertir datos en decisiones.</li>
+      <li><b>Índice de engagement:</b> selector de audiencia con métricas dinámicas, gráfico individual y una gráfica general consolidada.</li>
+      <li><b>Gestión de publicidad:</b> compara alcance, piezas, frecuencia, audiencia enganchada y riesgo para redes, correo, pauta y otros canales.</li>
+      <li><b>Regresar:</b> vuelve al inicio.</li>
+    </ul>
+
+    <hr>
+
+    <h3>2) Audience Library</h3>
+    <ul>
+      <li>Haz clic en una audiencia para ver su ficha.</li>
+      <li>La ficha evita duplicados y muestra: <b>Location</b>, <b>Demographics</b>, <b>Content</b>, <b>Behavior</b>, <b>Traffic</b>, <b>Competitors</b> e <b>Interests</b>.</li>
+      <li>Además convierte señales cualitativas en <b>scores cuantitativos (0–100)</b> para comparar audiencias más fácil.</li>
+      <li>Incluye 100 audiencias en total: 10 base + 90 adicionales.</li>
+    </ul>
+
+    <hr>
+
+    <h3>3) Test MBTI</h3>
+    <ul>
+      <li>Respondes 4 preguntas y obtienes un tipo (ej. INTJ).</li>
+      <li>El tipo se mapea a una audiencia (ej. INTJ → Hardcore Gamers) y se incrementa su contador.</li>
+      <li>Los datos se guardan en <b>localStorage</b>, así que persisten al recargar la página.</li>
+    </ul>
+
+    <hr>
+
+    <h3>4) Análisis</h3>
+    <ul>
+      <li><b>Elegir audiencia:</b> puedes analizar una audiencia específica o la opción “Audiencia dominante”.</li>
+      <li><b>Comenzar análisis:</b> actualiza KPIs, panel de retención e insights.</li>
+      <li><b>Generar reporte de audiencia:</b> crea un reporte de texto basado en la audiencia seleccionada.</li>
+      <li><b>Descargar insights:</b> descarga el último reporte como archivo .txt.</li>
+      <li><b>Guardar perfil:</b> guarda un snapshot para seguimiento.</li>
+      <li><b>Crear campaña:</b> genera un borrador rápido basado en los triggers del perfil.</li>
+    </ul>
+
+    <hr>
+
+    <h3>5) Índice de engagement</h3>
+    <ul>
+      <li>Selecciona una audiencia del catálogo.</li>
+      <li>Visualiza su engagement, CTR, tiempo medio de juego y retención.</li>
+      <li>La sección <b>General</b> compara el engagement de todas las audiencias en una sola gráfica.</li>
+    </ul>
+
+    <hr>
+
+    <h3>6) Gestión de publicidad</h3>
+    <ul>
+      <li>Selecciona una audiencia del catálogo.</li>
+      <li>Visualiza el alcance estimado por canal, número de piezas, frecuencia media, porcentaje de audiencia enganchada y nivel de riesgo.</li>
+      <li>Usa la tabla para lectura detallada y la gráfica para comparar rápidamente la fuerza de cada canal.</li>
+    </ul>
+  </div>
+</section>
+
+<script>
+function showSection(id){
+  document.querySelectorAll("section").forEach(s=>s.style.display="none");
+  document.getElementById(id).style.display="block";
+  if(id==="analysis"){ updateAnalysis(); }
+  if(id==="engagement"){ loadEngagementAudiences(); }
+  if(id==="channels"){ populateChannelAudienceSelect(); updateChannelModule(); }
+  if(id==="clustering"){
+    document.getElementById("clLog").innerHTML="Módulo cargado. Configura y ejecuta el clustering.";
+    document.getElementById("clResultsStep").style.display="none";
+    document.getElementById("clSelectStep").style.display="none";
+    document.getElementById("clDrillStep").style.display="none";
+  }
+}
+
+showSection("inicio");
+
+const audienceProfiles=[
+{
+  name:"Casual Gamers",
+  description:"Juegan ocasionalmente como entretenimiento ligero.",
+  strategy:"Implementar juegos free-to-play, demos cortas y comunicación enfocada en diversión rápida.",
+  why:"Buscan gratificación inmediata y bajo riesgo económico.",
+  location:["USA","Brasil","España"],
+  demographics:{ age:"16–35", gender:"Mixto", notes:"Sesiones cortas; baja tolerancia a fricción." },
+  contentConsumption:{
+    topContent:["Free-to-play","Demos","Gameplays cortos"],
+    peakDaysHours:"Vie–Dom, 18:00–23:00",
+    patterns:"Descubrimiento rápido y decisiones impulsivas."
+  },
+  behavior:{
+    bounceTriggers:"Registro temprano, menús complejos, tutoriales largos.",
+    timeTriggers:"Recompensas inmediatas y objetivos claros.",
+    exitTriggers:"Paywalls agresivos o fricción en el inicio."
+  },
+  trafficSources:["YouTube","TikTok","Instagram","Search"],
+  competitors:["Mobile gaming (F2P)","Nintendo (casual)","Xbox Game Pass (descubrimiento)"],
+  interests:["Party games","Arcade","Co-op local"],
+  scores:{
+    PriceSensitivity:85,
+    TimeAvailable:35,
+    CompetitionDrive:25,
+    CollectingAffinity:15,
+    SocialMotivation:45,
+    TechTolerance:30,
+    StoryInterest:35,
+    RiskAversion:70
+  },
+  bars:{Location:{USA:60,Brasil:45,España:35},Consumption:{Digital:65,Fisico:35},Traffic:{YouTube:50,TikTok:30,Twitch:20}}
+},
+{
+  name:"Hardcore Gamers",
+  description:"Usuarios altamente comprometidos con el gaming.",
+  strategy:"Exclusivos, betas, eventos competitivos y contenido técnico (comparativas, patch notes).",
+  why:"Buscan estatus, dominio técnico y profundidad.",
+  location:["USA","Japan","Germany"],
+  demographics:{ age:"18–40", gender:"Mixto", notes:"Alta frecuencia y gasto; valoran performance y dificultad." },
+  contentConsumption:{
+    topContent:["Reviews técnicas","Guías avanzadas","Patch notes"],
+    peakDaysHours:"Mar–Jue, 20:00–01:00",
+    patterns:"Investigación previa + maratones en lanzamientos."
+  },
+  behavior:{
+    bounceTriggers:"Info superficial o sin specs.",
+    timeTriggers:"Retos, rankings, endgame y builds.",
+    exitTriggers:"Balance roto, bugs sin respuesta, P2W."
+  },
+  trafficSources:["Twitch","YouTube","Reddit","Discord"],
+  competitors:["PC gaming (Steam)","Xbox (ecosistema)","Hardware/PC rigs"],
+  interests:["Soulslike","Action RPG","Shooter competitivo"],
+  scores:{
+    PriceSensitivity:30,
+    TimeAvailable:75,
+    CompetitionDrive:70,
+    CollectingAffinity:25,
+    SocialMotivation:50,
+    TechTolerance:85,
+    StoryInterest:55,
+    RiskAversion:20
+  },
+  bars:{Location:{USA:55,Japan:50,Germany:40},Consumption:{Digital:70,Fisico:30},Traffic:{Twitch:45,YouTube:40,Reddit:15}}
+},
+{
+  name:"Family Players",
+  description:"Gaming como actividad familiar.",
+  strategy:"Promocionar cooperativo, controles parentales, paquetes familiares y mensajes emocionales.",
+  why:"Apela a convivencia, seguridad y confianza.",
+  location:["USA","Canada","UK"],
+  demographics:{ age:"28–50", gender:"Mixto", notes:"Compra planificada; prioriza contenido apto y fácil." },
+  contentConsumption:{
+    topContent:["Co-op familiar","Recomendaciones por edad","Controles parentales"],
+    peakDaysHours:"Sab–Dom, 10:00–13:00 y 17:00–20:00",
+    patterns:"Sesiones compartidas; progreso simple."
+  },
+  behavior:{
+    bounceTriggers:"Contenido no apto o compras in-app confusas.",
+    timeTriggers:"Cooperativo local y actividades compartidas.",
+    exitTriggers:"Dificultad alta o toxicidad."
+  },
+  trafficSources:["YouTube","Facebook","TV/Streaming ads","Search"],
+  competitors:["Nintendo (familia)","Mobile/tablet (niños)","Suscripciones familiares"],
+  interests:["Co-op local","Aventura ligera","Educativos"],
+  scores:{
+    PriceSensitivity:55,
+    TimeAvailable:45,
+    CompetitionDrive:15,
+    CollectingAffinity:20,
+    SocialMotivation:70,
+    TechTolerance:40,
+    StoryInterest:45,
+    RiskAversion:80
+  },
+  bars:{Location:{USA:50,Canada:40,UK:30},Consumption:{Cooperativo:60,Educativo:40},Traffic:{YouTube:50,Facebook:30,TV:20}}
+},
+{
+  name:"Students",
+  description:"Jóvenes que juegan para socializar.",
+  strategy:"Descuentos, TikTok, drops con influencers y eventos por temporada.",
+  why:"Buscan pertenencia, validación social y precios accesibles.",
+  location:["Mexico","Colombia","Argentina"],
+  demographics:{ age:"15–24", gender:"Mixto", notes:"Sensibles a precio; manda la comunidad." },
+  contentConsumption:{
+    topContent:["Clips virales","Streams cortos","Tier lists"],
+    peakDaysHours:"Lun–Vie, 16:00–23:00",
+    patterns:"Descubrimiento social: lo que juega el grupo."
+  },
+  behavior:{
+    bounceTriggers:"Precio alto sin descuento.",
+    timeTriggers:"Co-op online, skins/estética, eventos.",
+    exitTriggers:"Paywalls o grind excesivo."
+  },
+  trafficSources:["TikTok","Instagram","YouTube","Discord"],
+  competitors:["Mobile (BR/F2P)","PC/Steam","Free-to-play dominantes"],
+  interests:["Multiplayer online","Battle royale","Co-op"],
+  scores:{
+    PriceSensitivity:90,
+    TimeAvailable:55,
+    CompetitionDrive:55,
+    CollectingAffinity:40,
+    SocialMotivation:85,
+    TechTolerance:55,
+    StoryInterest:30,
+    RiskAversion:45
+  },
+  bars:{Location:{Mexico:45,Colombia:40,Argentina:30},Consumption:{Online:65,Offline:35},Traffic:{TikTok:40,YouTube:35,Instagram:25}}
+},
+{
+  name:"Young Adults",
+  description:"Adultos jóvenes con poder adquisitivo.",
+  strategy:"Marketing aspiracional, premium, storytelling y bundles con accesorios.",
+  why:"Buscan recompensa emocional tras el trabajo y calidad.",
+  location:["USA","Spain","Chile"],
+  demographics:{ age:"25–39", gender:"Mixto", notes:"Tiempo limitado; pagan por conveniencia." },
+  contentConsumption:{
+    topContent:["Trailers","Reviews sin spoilers","Lore/story"],
+    peakDaysHours:"Lun–Jue, 19:00–23:00",
+    patterns:"Compra por reputación y valor percibido."
+  },
+  behavior:{
+    bounceTriggers:"UX lenta o fricción en checkout.",
+    timeTriggers:"Narrativa fuerte y progreso claro.",
+    exitTriggers:"Relleno/grind o monetización agresiva."
+  },
+  trafficSources:["YouTube","Instagram","Web/Reviews","Search"],
+  competitors:["Streaming (tiempo)","PC/Steam","Game Pass"],
+  interests:["Action-adventure","RPG","Narrativa"],
+  scores:{
+    PriceSensitivity:40,
+    TimeAvailable:45,
+    CompetitionDrive:30,
+    CollectingAffinity:25,
+    SocialMotivation:35,
+    TechTolerance:55,
+    StoryInterest:75,
+    RiskAversion:50
+  },
+  bars:{Location:{USA:50,Spain:40,Chile:30},Consumption:{Premium:60,Standard:40},Traffic:{YouTube:45,Instagram:30,Web:25}}
+},
+{
+  name:"Competitive",
+  description:"Motivados por la competencia.",
+  strategy:"eSports, torneos, ranked, temporadas y recompensas por participación.",
+  why:"Motivación de logro y superación.",
+  location:["Korea","USA","Brazil"],
+  demographics:{ age:"16–32", gender:"Mixto", notes:"Alto tiempo de práctica; buscan ventaja." },
+  contentConsumption:{
+    topContent:["Meta builds","VODs pro","Notas de parche"],
+    peakDaysHours:"Mie–Dom, 20:00–02:00",
+    patterns:"Consumo repetitivo para mejorar rendimiento."
+  },
+  behavior:{
+    bounceTriggers:"Lag, matchmaking injusto, falta de anti-cheat.",
+    timeTriggers:"Ranked, estadísticas, recompensas por temporada.",
+    exitTriggers:"Toxicidad sin moderación o balance roto."
+  },
+  trafficSources:["Twitch","Discord","YouTube"],
+  competitors:["PC eSports","Ecosistemas FPS competitivos","Plataformas de torneos"],
+  interests:["FPS competitivo","Fighting games","Mechanics"],
+  scores:{
+    PriceSensitivity:35,
+    TimeAvailable:80,
+    CompetitionDrive:95,
+    CollectingAffinity:20,
+    SocialMotivation:60,
+    TechTolerance:75,
+    StoryInterest:20,
+    RiskAversion:25
+  },
+  bars:{Location:{Korea:50,USA:40,Brazil:30},Consumption:{Online:70,Offline:30},Traffic:{Twitch:50,YouTube:30,Discord:20}}
+},
+{
+  name:"Collectors",
+  description:"Coleccionistas.",
+  strategy:"Ediciones limitadas, drops temporales, certificados y escasez controlada.",
+  why:"La exclusividad y el valor simbólico disparan compra.",
+  location:["Japan","USA","France"],
+  demographics:{ age:"22–45", gender:"Mixto", notes:"Alta afinidad a exclusividad; siguen stock." },
+  contentConsumption:{
+    topContent:["Unboxings","Catálogos","Noticias de coleccionables"],
+    peakDaysHours:"Jue–Dom, 18:00–00:00",
+    patterns:"Compra por ventanas; seguimiento constante."
+  },
+  behavior:{
+    bounceTriggers:"Info incompleta o stock incierto.",
+    timeTriggers:"Pre-order, extras exclusivos, contadores.",
+    exitTriggers:"Cancelaciones o mala logística."
+  },
+  trafficSources:["Web/foros","YouTube","Newsletters"],
+  competitors:["Retailers coleccionables","Mercados de reventa","Coleccionismo multiplataforma"],
+  interests:["Steelbooks","Artbooks","Figuras"],
+  scores:{
+    PriceSensitivity:20,
+    TimeAvailable:55,
+    CompetitionDrive:15,
+    CollectingAffinity:95,
+    SocialMotivation:30,
+    TechTolerance:50,
+    StoryInterest:55,
+    RiskAversion:40
+  },
+  bars:{Location:{Japan:45,USA:40,France:30},Consumption:{Fisico:70,Digital:30},Traffic:{Web:40,YouTube:35,Foros:25}}
+},
+{
+  name:"Mobile Migrants",
+  description:"Migran del móvil a consola.",
+  strategy:"Bundles económicos, onboarding guiado y mensajes ‘sube de nivel’.",
+  why:"Baja barrera de entrada y reduce ansiedad tecnológica.",
+  location:["India","Brazil","Mexico"],
+  demographics:{ age:"14–30", gender:"Mixto", notes:"Necesitan quick wins y guías simples." },
+  contentConsumption:{
+    topContent:["Tutoriales básicos","Top juegos para empezar"],
+    peakDaysHours:"Todos los días, 17:00–22:00",
+    patterns:"Exploran mucho; retienen si el inicio es amable."
+  },
+  behavior:{
+    bounceTriggers:"Jerga técnica, controles difíciles.",
+    timeTriggers:"Asistencias, modo historia, tutorial corto.",
+    exitTriggers:"Menús complejos o instalación pesada."
+  },
+  trafficSources:["TikTok","YouTube","Ads"],
+  competitors:["Mobile premium","Cloud gaming","Switch lite"],
+  interests:["Action accesible","Carreras","Aventura"],
+  scores:{
+    PriceSensitivity:70,
+    TimeAvailable:40,
+    CompetitionDrive:35,
+    CollectingAffinity:15,
+    SocialMotivation:40,
+    TechTolerance:35,
+    StoryInterest:40,
+    RiskAversion:65
+  },
+  bars:{Location:{India:50,Brazil:40,Mexico:30},Consumption:{Casual:60,Premium:40},Traffic:{TikTok:45,YouTube:35,Ads:20}}
+},
+{
+  name:"Budget Gamers",
+  description:"Priorizan el ahorro.",
+  strategy:"Ofertas, bundles, suscripciones y alertas personalizadas.",
+  why:"Maximizan valor percibido y minimizan riesgo.",
+  location:["Peru","Philippines","India"],
+  demographics:{ age:"16–38", gender:"Mixto", notes:"Comparan precios; compran por eventos de rebajas." },
+  contentConsumption:{
+    topContent:["Listas de ofertas","Comparadores","Vale la pena"],
+    peakDaysHours:"Vie–Dom, 12:00–22:00",
+    patterns:"Wishlist + compras por temporadas."
+  },
+  behavior:{
+    bounceTriggers:"Costos ocultos o poca transparencia.",
+    timeTriggers:"Descuentos claros y packs.",
+    exitTriggers:"Microtransacciones o P2W."
+  },
+  trafficSources:["Facebook","WhatsApp","Web/deals","Search"],
+  competitors:["Steam sales","Game Pass","Mobile F2P"],
+  interests:["Bundles","Indies","Ofertas flash"],
+  scores:{
+    PriceSensitivity:95,
+    TimeAvailable:45,
+    CompetitionDrive:25,
+    CollectingAffinity:20,
+    SocialMotivation:35,
+    TechTolerance:45,
+    StoryInterest:35,
+    RiskAversion:70
+  },
+  bars:{Location:{Peru:40,Philippines:35,India:30},Consumption:{Ofertas:65,Normal:35},Traffic:{Facebook:45,WhatsApp:30,Web:25}}
+},
+{
+  name:"Nostalgia Players",
+  description:"Conectados emocionalmente a clásicos.",
+  strategy:"Remakes, aniversarios, detrás de cámaras y storytelling nostálgico.",
+  why:"La nostalgia aumenta fidelidad y disposición a pagar.",
+  location:["Japan","USA","Spain"],
+  demographics:{ age:"28–55", gender:"Mixto", notes:"Compra emocional; comparan original vs remake." },
+  contentConsumption:{
+    topContent:["Retrospectivas","Comparativas remake/original","Documentales"],
+    peakDaysHours:"Sab–Dom, 19:00–00:00",
+    patterns:"Consumo largo (ensayos) + compra por recuerdo."
+  },
+  behavior:{
+    bounceTriggers:"Cambios drásticos sin respeto al original.",
+    timeTriggers:"Easter eggs, música icónica, coleccionables.",
+    exitTriggers:"Falta de calidad o bugs."
+  },
+  trafficSources:["YouTube","Web/retros","TV/streaming"],
+  competitors:["Emulación/retro","Remasters externos","PC mods"],
+  interests:["Remakes","JRPG clásicos","Narrativa"],
+  scores:{
+    PriceSensitivity:45,
+    TimeAvailable:55,
+    CompetitionDrive:10,
+    CollectingAffinity:55,
+    SocialMotivation:20,
+    TechTolerance:45,
+    StoryInterest:90,
+    RiskAversion:55
+  },
+  bars:{Location:{Japan:40,USA:35,Spain:30},Consumption:{Remakes:60,New:40},Traffic:{YouTube:50,Web:30,TV:20}}
+}
+];
+
+/* +90 AUDIENCIAS ADICIONALES */
+const extraAudienceNames = [
+  "Streamer Fans","Indie Explorers","Retro Hunters","JRPG Lovers","Shooter Loyalists",
+  "Sandbox Builders","Story Seekers","Trophy Chasers","Weekend Warriors","Co-op Enthusiasts",
+  "Speedrun Watchers","Puzzle Thinkers","Horror Addicts","Sci-Fi Dreamers","Fantasy Raiders",
+  "Open World Travelers","Sports Gamers","Racing Fans","Simulation Players","Stealth Lovers",
+  "Survival Fans","Battle Royale Crowd","MMO Visitors","Anime Gamers","Cinematic Players",
+  "Casual Collectors","Esports Spectators","Late Night Gamers","After Work Players","Achievement Hunters",
+  "Arcade Purists","Mobile Returners","Social Squad Players","Competitive Teens","Family Weekend Gamers",
+  "Solo Adventurers","Digital Deal Seekers","Premium Loyalists","Remake Enthusiasts","Hardcore Strategists",
+  "Platformer Fans","Action Junkies","Narrative Explorers","Community Driven Players","Live Service Followers",
+  "Roguelike Fans","Creative Mode Players","Customization Lovers","Lore Collectors","Boss Fight Seekers",
+  "Streamer Community Members","Cosmetic Hunters","Season Pass Buyers","Minimalist Gamers","High Skill Players",
+  "Low Commitment Players","Trend Followers","Franchise Loyalists","First Time Console Players","Portable Mindset Players",
+  "Cloud Curious Players","Local Multiplayer Fans","Retro Remaster Fans","High Spend Players","Value Hunters",
+  "Cross-Gen Players","Online Ranked Players","Comfort Gamers","Festival Event Players","Collector Edition Buyers",
+  "Weekend Co-op Fans","Teen Social Gamers","Adult Escape Players","Immersion Seekers","Challenge Addicts",
+  "Relaxed Explorers","Fast Session Players","Long Session Players","Story Bingers","Tech Showcase Players",
+  "Visual Fidelity Fans","Performance Mode Players","Soundtrack Lovers","Classic Franchise Fans","New IP Explorers",
+  "Seasonal Event Hunters","Console Newcomers","Shared Screen Players","Framerate Purists","Lore Completionists"
+];
+
+const extraCountries = [
+  ["USA","Canada","UK"],
+  ["Mexico","Colombia","Argentina"],
+  ["Japan","Spain","France"],
+  ["Brazil","Chile","Peru"],
+  ["Germany","Italy","Netherlands"],
+  ["India","Philippines","Indonesia"],
+  ["Korea","USA","Brazil"],
+  ["Australia","New Zealand","South Africa"],
+  ["Portugal","Spain","Mexico"],
+  ["Turkey","Poland","Romania"]
+];
+
+const extraTrafficSets = [
+  ["YouTube","TikTok","Instagram"],
+  ["Twitch","YouTube","Discord"],
+  ["Facebook","WhatsApp","Web"],
+  ["Reddit","YouTube","Search"],
+  ["Instagram","TikTok","YouTube"],
+  ["Web","Forums","Newsletter"],
+  ["Discord","Twitch","YouTube"],
+  ["TV","YouTube","Facebook"]
+];
+
+const extraInterestSets = [
+  ["Adventure","Action","Co-op"],
+  ["RPG","Narrative","Fantasy"],
+  ["Shooter","Competitive","Ranked"],
+  ["Indie","Puzzle","Platformer"],
+  ["Horror","Survival","Story"],
+  ["Sports","Racing","Simulation"],
+  ["Retro","Remakes","Collectibles"],
+  ["Sandbox","Creative","Customization"]
+];
+
+const extraDescriptions = [
+  "Jugadores con preferencias marcadas por estilo, ritmo y canal de consumo.",
+  "Segmento con comportamiento específico y patrones de engagement diferenciados.",
+  "Audiencia especializada con motivadores claros y hábitos de consumo definidos.",
+  "Perfil de jugador orientado por experiencia, comunidad y tipo de contenido."
+];
+
+const extraStrategies = [
+  "Campañas segmentadas por canal principal, mensaje corto y CTA directo.",
+  "Contenido de valor, activaciones con comunidad y piezas visuales de alta claridad.",
+  "Bundles temáticos, social proof y enfoque en beneficios concretos del producto.",
+  "Storytelling orientado al perfil y optimización de anuncios según interés dominante."
+];
+
+const extraWhy = [
+  "Funciona porque conecta el mensaje con el disparador emocional principal del segmento.",
+  "Funciona porque reduce fricción y mejora la relevancia percibida.",
+  "Funciona porque alinea canal, contenido y motivación dominante.",
+  "Funciona porque convierte interés pasivo en acción medible."
+];
+
+function rotatePick(arr, i){
+  return arr[i % arr.length];
+}
+
+function generateScoreSet(i){
+  return {
+    PriceSensitivity: 20 + ((i * 7) % 76),
+    TimeAvailable: 25 + ((i * 11) % 71),
+    CompetitionDrive: 10 + ((i * 13) % 86),
+    CollectingAffinity: 5 + ((i * 17) % 91),
+    SocialMotivation: 15 + ((i * 19) % 81),
+    TechTolerance: 20 + ((i * 23) % 76),
+    StoryInterest: 10 + ((i * 29) % 86),
+    RiskAversion: 15 + ((i * 31) % 81)
+  };
+}
+
+function generateBarsFromScores(scores, i){
+  const locationSet = rotatePick(extraCountries, i);
+  const trafficSet = rotatePick(extraTrafficSets, i);
+
+  const locA = Math.min(75, 30 + Math.round(scores.SocialMotivation * 0.35));
+  const locB = Math.min(68, 25 + Math.round(scores.StoryInterest * 0.30));
+  const locC = Math.min(60, 20 + Math.round(scores.TechTolerance * 0.28));
+
+  const consumptionA = Math.min(80, 25 + Math.round(scores.TimeAvailable * 0.45));
+  const consumptionB = Math.max(20, 100 - consumptionA);
+
+  const trA = Math.min(78, 25 + Math.round(scores.SocialMotivation * 0.40));
+  const trB = Math.min(70, 20 + Math.round(scores.CompetitionDrive * 0.35));
+  const trC = Math.min(60, 15 + Math.round(scores.StoryInterest * 0.30));
+
+  return {
+    Location:{
+      [locationSet[0]]: locA,
+      [locationSet[1]]: locB,
+      [locationSet[2]]: locC
+    },
+    Consumption:{
+      Digital: consumptionA,
+      Fisico: consumptionB
+    },
+    Traffic:{
+      [trafficSet[0]]: trA,
+      [trafficSet[1]]: trB,
+      [trafficSet[2]]: trC
+    }
+  };
+}
+
+function generateExtraAudience(name, i){
+  const scores = generateScoreSet(i);
+  const countries = rotatePick(extraCountries, i);
+  const interests = rotatePick(extraInterestSets, i);
+  const traffic = rotatePick(extraTrafficSets, i);
+  const bars = generateBarsFromScores(scores, i);
+
+  const ageMin = 14 + (i % 12);
+  const ageMax = ageMin + 12 + (i % 10);
+
+  return {
+    name,
+    description: rotatePick(extraDescriptions, i),
+    strategy: rotatePick(extraStrategies, i),
+    why: rotatePick(extraWhy, i),
+    location: countries,
+    demographics:{
+      age: `${ageMin}–${ageMax}`,
+      gender: "Mixto",
+      notes: `Perfil generado automáticamente con foco en ${interests[0].toLowerCase()}, ${interests[1].toLowerCase()} y ${interests[2].toLowerCase()}.`
+    },
+    contentConsumption:{
+      topContent: interests,
+      peakDaysHours: (i % 2 === 0) ? "Lun–Vie, 18:00–23:00" : "Sab–Dom, 14:00–00:00",
+      patterns: `Alta afinidad por contenido de ${interests[0].toLowerCase()} y descubrimiento vía ${traffic[0]}.`
+    },
+    behavior:{
+      bounceTriggers: "Fricción alta, mensajes poco claros o exceso de pasos.",
+      timeTriggers: `Contenido relevante, progreso claro y propuesta afín a ${interests[0].toLowerCase()}.`,
+      exitTriggers: "Baja claridad de valor, mala UX o falta de recompensa percibida."
+    },
+    trafficSources: traffic,
+    competitors: [
+      `${interests[0]} alternatives`,
+      "Otras plataformas de entretenimiento",
+      "Competidores directos del género"
+    ],
+    interests,
+    scores,
+    bars
+  };
+}
+
+const existingAudienceNames = new Set(audienceProfiles.map(a => a.name));
+extraAudienceNames.forEach((name, i) => {
+  if(!existingAudienceNames.has(name)){
+    audienceProfiles.push(generateExtraAudience(name, i + 1));
+  }
+});
+
+/* STORAGE */
+const STORAGE_KEY = "audienceStats_v1";
+let audienceStats = JSON.parse(localStorage.getItem(STORAGE_KEY));
+
+if(!Array.isArray(audienceStats) || audienceStats.length !== audienceProfiles.length){
+  audienceStats = Array(audienceProfiles.length).fill(0);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(audienceStats));
+}
+
+const grid = document.getElementById("audienceGrid");
+
+function renderAudienceButtons(){
+  grid.innerHTML="";
+  audienceProfiles.forEach((a,i)=>{
+    let div=document.createElement("div");
+    div.className="card";
+    div.textContent = a.name + " (" + audienceStats[i] + ")";
+    div.onclick = ()=>openPopup(i);
+    grid.appendChild(div);
+  });
+}
+renderAudienceButtons();
+
+/* POPUP */
+function openPopup(i){
+  const a = audienceProfiles[i];
+
+  const listOrDash = (arr)=> (Array.isArray(arr) && arr.length)
+    ? `<ul>${arr.map(x=>`<li>${x}</li>`).join("")}</ul>`
+    : `<p class="small">—</p>`;
+
+  const safe = (v)=> (v===undefined || v===null || v==="") ? "—" : v;
+
+  const scoreBars = (scores)=>{
+    if(!scores) return `<p class="small">—</p>`;
+    let s = "";
+    for(const k of Object.keys(scores)){
+      const val = Math.max(0, Math.min(100, Number(scores[k]||0)));
+      s += `<div class="bar mini" style="width:${val}%">${k}: ${val}</div>`;
+    }
+    return s;
+  };
+
+  let html = `
+    <h2>${a.name}</h2>
+    <p><b>Descripción:</b> ${a.description}</p>
+    <p><b>Usuarios registrados:</b> ${audienceStats[i]}</p>
+
+    <hr>
+
+    <h3>LOCATION</h3>
+    <p>${Array.isArray(a.location)? a.location.join(", ") : "—"}</p>
+
+    <h3>DEMOGRAPHICS</h3>
+    <p><b>Edad:</b> ${safe(a.demographics?.age)} · <b>Género:</b> ${safe(a.demographics?.gender)}</p>
+    <p class="small">${safe(a.demographics?.notes)}</p>
+
+    <h3>CONTENT CONSUMPTION</h3>
+    <p><b>Top contenido:</b> ${Array.isArray(a.contentConsumption?.topContent)? a.contentConsumption.topContent.join(", ") : "—"}</p>
+    <p><b>Pico:</b> ${safe(a.contentConsumption?.peakDaysHours)}</p>
+    <p class="small"><b>Patrón:</b> ${safe(a.contentConsumption?.patterns)}</p>
+
+    <h3>BEHAVIOR</h3>
+    <p class="small"><b>Bounce:</b> ${safe(a.behavior?.bounceTriggers)}</p>
+    <p class="small"><b>Engagement:</b> ${safe(a.behavior?.timeTriggers)}</p>
+    <p class="small"><b>Exit:</b> ${safe(a.behavior?.exitTriggers)}</p>
+
+    <h3>QUANT SCORES (0–100)</h3>
+    <p class="small">Traducción “cuali → cuanti” para comparar rápido segmentos.</p>
+    ${scoreBars(a.scores)}
+
+    <hr>
+
+    <h3>TRAFFIC SOURCES</h3>
+    ${listOrDash(a.trafficSources)}
+
+    <h3>COMPETITORS</h3>
+    ${listOrDash(a.competitors)}
+
+    <h3>INTEREST TOPICS</h3>
+    ${listOrDash(a.interests)}
+
+    <hr>
+
+    <h3>Estrategia</h3>
+    <p>${a.strategy}</p>
+
+    <h3>Por qué funciona</h3>
+    <p>${a.why}</p>
+  `;
+
+  if(a.bars){
+    for(let key in a.bars){
+      html += `<hr><h3>${key}</h3>`;
+      for(let item in a.bars[key]){
+        html += `<div class="bar" style="width:${a.bars[key][item]}%">${item} ${a.bars[key][item]}%</div>`;
+      }
+    }
+  }
+
+  document.getElementById("popupData").innerHTML = html;
+  document.getElementById("popup").style.display = "flex";
+}
+
+function closePopup(){
+  document.getElementById("popup").style.display="none";
+}
+
+document.getElementById("popup").addEventListener("click",(e)=>{
+  if(e.target.id==="popup") closePopup();
+});
+document.addEventListener("keydown",(e)=>{
+  if(e.key==="Escape") closePopup();
+});
+
+/* ANALISIS */
+let lastReportText = "";
+const LAST_REPORT_KEY = "lastAudienceReport_v1";
+const SAVED_PROFILES_KEY = "savedAudienceProfiles_v1";
+const SELECTED_AUDIENCE_KEY = "selectedAudience_v1";
+let selectedAudienceMode = localStorage.getItem(SELECTED_AUDIENCE_KEY) || "__dominant__";
+
+function populateAudienceSelect(){
+  const sel = document.getElementById("audienceSelect");
+  if(!sel) return;
+
+  sel.innerHTML = "";
+  const optDominant = document.createElement("option");
+  optDominant.value = "__dominant__";
+  optDominant.textContent = "Audiencia dominante (auto)";
+  sel.appendChild(optDominant);
+
+  audienceProfiles.forEach((p, idx)=>{
+    const o = document.createElement("option");
+    o.value = String(idx);
+    o.textContent = p.name;
+    sel.appendChild(o);
+  });
+
+  sel.value = selectedAudienceMode;
+}
+
+function setSelectedAudience(value){
+  selectedAudienceMode = value;
+  localStorage.setItem(SELECTED_AUDIENCE_KEY, value);
+  updateAnalysis();
+}
+
+function getDominantAudience(){
+  const total = audienceStats.reduce((a,b)=>a+b,0);
+  if(total <= 0) return { profile:null, index:-1, total, count:0, share:0 };
+
+  let max=-1, idx=-1;
+  for(let i=0;i<audienceStats.length;i++){
+    if(audienceStats[i] > max){ max = audienceStats[i]; idx = i; }
+  }
+  const share = total>0 ? Math.round((max/total)*100) : 0;
+  return { profile: audienceProfiles[idx], index: idx, total, count: max, share };
+}
+
+function getSelectedAudience(){
+  const total = audienceStats.reduce((a,b)=>a+b,0);
+
+  if(selectedAudienceMode === "__dominant__"){
+    return getDominantAudience();
+  }
+
+  const idx = Number(selectedAudienceMode);
+  if(Number.isNaN(idx) || idx < 0 || idx >= audienceProfiles.length){
+    return getDominantAudience();
+  }
+
+  const count = audienceStats[idx] || 0;
+  const share = total>0 ? Math.round((count/total)*100) : 0;
+  return { profile: audienceProfiles[idx], index: idx, total, count, share };
+}
+
+function startAnalysisFlow(){
+  updateAnalysis();
+  document.getElementById("conversionPanel").scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+function updateRetentionPanel(){
+  const { profile, count, total, share } = getSelectedAudience();
+
+  const titleEl = document.getElementById("detectedAudienceTitle");
+  const detailsEl = document.getElementById("retentionDetails");
+  const nameEl = document.getElementById("selectedAudienceName");
+  const shareEl = document.getElementById("selectedAudienceShare");
+
+  if(!profile){
+    titleEl.textContent = "—";
+    detailsEl.innerHTML = "Completa el test para detectar/analizar una audiencia.";
+    nameEl.textContent = "—";
+    shareEl.textContent = "—";
+    return;
+  }
+
+  nameEl.textContent = `${profile.name} (${count})`;
+  shareEl.textContent = `${share}% del total (${total})`;
+  titleEl.textContent = profile.name;
+
+  const age = profile.demographics?.age || "—";
+  const time = profile.contentConsumption?.peakDaysHours || "—";
+  const fav = (profile.trafficSources && profile.trafficSources[0]) ? profile.trafficSources[0] : "—";
+  const s = profile.scores || {};
+  const topScore = Object.keys(s).sort((a,b)=> (s[b]||0)-(s[a]||0))[0] || "—";
+  const topVal = s[topScore] ?? "—";
+
+  detailsEl.innerHTML = `
+    <p><b>Edad dominante:</b> ${age}</p>
+    <p><b>Tiempo de juego / horas pico:</b> ${time}</p>
+    <p><b>Canal principal:</b> ${fav}</p>
+    <p><b>Señal cuantitativa más fuerte:</b> ${topScore} (${topVal}/100)</p>
+    <p class="small"><b>Trigger recomendado:</b> ${profile.behavior?.timeTriggers || "—"}</p>
+  `;
+}
+
+function generateAudienceReport(){
+  const { profile, count, total, share } = getSelectedAudience();
+
+  if(!profile){
+    lastReportText = "No hay datos suficientes. Completa el test MBTI para generar un reporte.";
+    renderReportOutput();
+    return;
+  }
+
+  const lines = [];
+  lines.push("PLAYSTATION AUDIENCE INTELLIGENCE REPORT");
+  lines.push("=======================================");
+  lines.push(`Audiencia en análisis: ${profile.name}`);
+  lines.push(`Usuarios en este segmento: ${count} de ${total} (${share}%)`);
+  lines.push("");
+  lines.push("RESUMEN");
+  lines.push(`- Descripción: ${profile.description}`);
+  lines.push(`- Edad dominante: ${profile.demographics?.age || "—"}`);
+  lines.push(`- Nota: ${profile.demographics?.notes || "—"}`);
+  lines.push("");
+  lines.push("LOCATION");
+  lines.push(`- ${Array.isArray(profile.location) ? profile.location.join(", ") : "—"}`);
+  lines.push("");
+  lines.push("CONTENT CONSUMPTION");
+  lines.push(`- Top content: ${Array.isArray(profile.contentConsumption?.topContent) ? profile.contentConsumption.topContent.join(", ") : "—"}`);
+  lines.push(`- Peak: ${profile.contentConsumption?.peakDaysHours || "—"}`);
+  lines.push(`- Patterns: ${profile.contentConsumption?.patterns || "—"}`);
+  lines.push("");
+  lines.push("BEHAVIOR (TRIGGERS)");
+  lines.push(`- Bounce: ${profile.behavior?.bounceTriggers || "—"}`);
+  lines.push(`- Engagement: ${profile.behavior?.timeTriggers || "—"}`);
+  lines.push(`- Exit: ${profile.behavior?.exitTriggers || "—"}`);
+  lines.push("");
+  lines.push("QUANT SCORES (0–100)");
+  if(profile.scores){
+    Object.keys(profile.scores).forEach(k=> lines.push(`- ${k}: ${profile.scores[k]}`));
+  } else {
+    lines.push("- —");
+  }
+  lines.push("");
+  lines.push("TRAFFIC SOURCES");
+  lines.push(`- ${Array.isArray(profile.trafficSources) ? profile.trafficSources.join(", ") : "—"}`);
+  lines.push("");
+  lines.push("COMPETITORS");
+  lines.push(`- ${Array.isArray(profile.competitors) ? profile.competitors.join(", ") : "—"}`);
+  lines.push("");
+  lines.push("INTEREST TOPICS");
+  lines.push(`- ${Array.isArray(profile.interests) ? profile.interests.join(", ") : "—"}`);
+  lines.push("");
+  lines.push("RECOMMENDED STRATEGY");
+  lines.push(`- ${profile.strategy}`);
+  lines.push("");
+  lines.push("WHY IT WORKS");
+  lines.push(`- ${profile.why}`);
+  lines.push("");
+  lines.push("NEXT ACTIONS");
+  lines.push("- Guarda el perfil para retención.");
+  lines.push("- Genera una campaña basada en el score dominante + trigger.");
+  lines.push("");
+
+  lastReportText = lines.join("\n");
+  localStorage.setItem(LAST_REPORT_KEY, lastReportText);
+  renderReportOutput();
+  document.getElementById("reportPanel").scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+function renderReportOutput(){
+  document.getElementById("reportOutput").textContent = lastReportText || "Aún no hay reporte generado.";
+}
+
+function downloadLastReport(){
+  const stored = localStorage.getItem(LAST_REPORT_KEY);
+  if(stored) lastReportText = stored;
+
+  if(!lastReportText){
+    alert("No hay reporte para descargar. Genera uno primero.");
+    return;
+  }
+
+  const blob = new Blob([lastReportText], {type:"text/plain;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "audience_insights_report.txt";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function saveSelectedProfile(){
+  const { profile, share, count, total } = getSelectedAudience();
+  if(!profile){
+    alert("Aún no hay audiencia para guardar. Completa el test o selecciona una audiencia con datos.");
+    return;
+  }
+
+  const saved = JSON.parse(localStorage.getItem(SAVED_PROFILES_KEY) || "[]");
+  const stamp = new Date().toISOString();
+  const s = profile.scores || {};
+  const topScore = Object.keys(s).sort((a,b)=> (s[b]||0)-(s[a]||0))[0] || "—";
+
+  const entry = {
+    savedAt: stamp,
+    name: profile.name,
+    share, count, total,
+    snapshot: {
+      age: profile.demographics?.age || "—",
+      peak: profile.contentConsumption?.peakDaysHours || "—",
+      topTraffic: (profile.trafficSources && profile.trafficSources[0]) ? profile.trafficSources[0] : "—",
+      topScore: topScore,
+      topScoreValue: s[topScore] ?? "—",
+      trigger: profile.behavior?.timeTriggers || "—"
+    }
+  };
+
+  saved.unshift(entry);
+  localStorage.setItem(SAVED_PROFILES_KEY, JSON.stringify(saved));
+  alert(`Perfil guardado: ${profile.name}`);
+}
+
+function createCampaignFromProfile(){
+  const { profile } = getSelectedAudience();
+  if(!profile){
+    alert("Primero selecciona una audiencia (y que tenga datos).");
+    return;
+  }
+
+  const channel = (profile.trafficSources && profile.trafficSources[0]) ? profile.trafficSources[0] : "YouTube";
+  const hook = profile.behavior?.timeTriggers || "recompensas claras";
+  const content = (profile.contentConsumption?.topContent && profile.contentConsumption.topContent[0]) ? profile.contentConsumption.topContent[0] : "gameplay";
+  const s = profile.scores || {};
+  const focus = Object.keys(s).sort((a,b)=> (s[b]||0)-(s[a]||0))[0] || "—";
+
+  const idea = [
+    `Campaña sugerida para: ${profile.name}`,
+    `Foco (score dominante): ${focus} (${s[focus] ?? "—"}/100)`,
+    `Canal: ${channel}`,
+    `Hook: ${hook}`,
+    `Contenido: ${content}`,
+    `CTA: “Juega hoy / Prueba gratis / Únete al evento”`,
+    `Métrica: CTR + Retención D1`
+  ].join("\n");
+
+  lastReportText = (lastReportText ? lastReportText + "\n\n" : "") + "CAMPAIGN DRAFT\n=============\n" + idea + "\n";
+  localStorage.setItem(LAST_REPORT_KEY, lastReportText);
+  renderReportOutput();
+  document.getElementById("reportPanel").scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+function updateAnalysis(){
+  populateAudienceSelect();
+  const total = audienceStats.reduce((a,b)=>a+b,0);
+  document.getElementById("totalUsers").textContent =
+    `${total} usuarios han completado el test. (Los datos se guardan en localStorage)`;
+
+  let html = "";
+  audienceProfiles.forEach((profile,i)=>{
+    const percent = total>0 ? Math.round((audienceStats[i]/total)*100) : 0;
+    html += `
+      <p><b>${profile.name}</b> - ${audienceStats[i]} usuarios (${percent}%)</p>
+      <div class="bar" style="width:${percent}%">${percent}%</div>
+    `;
+  });
+  document.getElementById("analysisData").innerHTML = html;
+  updateRetentionPanel();
+
+  const stored = localStorage.getItem(LAST_REPORT_KEY);
+  if(stored && !lastReportText){
+    lastReportText = stored;
+    renderReportOutput();
+  }
+}
+
+/* TEST MBTI */
+const questions=[
+  {q:"Prefieres socializar o estar solo?", a:[["Socializar","E"],["Estar solo","I"]]},
+  {q:"Te enfocas más en hechos o ideas?", a:[["Hechos","S"],["Ideas","N"]]},
+  {q:"Decides por lógica o emociones?", a:[["Lógica","T"],["Emociones","F"]]},
+  {q:"Prefieres planificar o improvisar?", a:[["Planificar","J"],["Improvisar","P"]]}
+];
+
+const mbtiGames={
+  INTJ:["God of War Ragnarok","Horizon Forbidden West","Death Stranding"],
+  INFP:["Stray","Final Fantasy VII Remake","The Last Guardian"],
+  ENFP:["Ratchet & Clank Rift Apart","Crash Bandicoot 4","Sackboy"],
+  ISTP:["Ghost of Tsushima","Sekiro","Demon's Souls"]
+};
+
+const mbtiToAudience = {
+  INTJ:"Hardcore Gamers",
+  INFP:"Nostalgia Players",
+  ENFP:"Casual Gamers",
+  ISTP:"Competitive"
+};
+
+let qIndex=0;
+let result={E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0};
+const qText=document.getElementById("question");
+const optionsDiv=document.getElementById("options");
+
+function loadQuestion(){
+  if(qIndex<questions.length){
+    qText.textContent=questions[qIndex].q;
+    optionsDiv.innerHTML="";
+    questions[qIndex].a.forEach(opt=>{
+      let btn=document.createElement("div");
+      btn.className="option";
+      btn.textContent=opt[0];
+      btn.onclick=()=>selectAnswer(opt[1]);
+      optionsDiv.appendChild(btn);
+    });
+  }else{
+    saveResult();
+  }
+}
+
+function selectAnswer(type){
+  result[type]++;
+  qIndex++;
+  loadQuestion();
+}
+
+function saveResult(){
+  let mbtiType =
+    (result.E>result.I?"E":"I")+
+    (result.S>result.N?"S":"N")+
+    (result.T>result.F?"T":"F")+
+    (result.J>result.P?"J":"P");
+
+  let games = mbtiGames[mbtiType] || ["God of War","Spider-Man","Gran Turismo"];
+  const targetName = mbtiToAudience[mbtiType] || "Young Adults";
+  const idx = audienceProfiles.findIndex(p => p.name === targetName);
+  if(idx >= 0) audienceStats[idx]++;
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(audienceStats));
+  renderAudienceButtons();
+
+  qText.textContent="Resultado de personalidad: "+mbtiType;
+  optionsDiv.innerHTML=`
+    <p>Según tu tipo de personalidad <b>${mbtiType}</b>, estos juegos de PlayStation podrían gustarte:</p>
+    <ul>
+      ${games.map(g=>`<li>${g}</li>`).join("")}
+    </ul>
+    <p class="small">Perfil de audiencia asignado: <b>${targetName}</b></p>
+    <button onclick="restartTest()">Nuevo usuario</button>
+  `;
+}
+
+function restartTest(){
+  qIndex=0;
+  result={E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0};
+  loadQuestion();
+}
+
+loadQuestion();
+
+/* ENGAGEMENT */
+let engagementChart = null;
+let generalEngagementChart = null;
+
+function loadEngagementAudiences(){
+  const select = document.getElementById("engagementAudienceSelect");
+  if(!select) return;
+
+  select.innerHTML = "";
+  audienceProfiles.forEach(a=>{
+    const option = document.createElement("option");
+    option.value = a.name;
+    option.textContent = a.name;
+    select.appendChild(option);
+  });
+
+  select.onchange = updateEngagementModule;
+  updateEngagementModule();
+  drawGeneralEngagementChart();
+}
+
+function averageValues(obj){
+  if(!obj) return 0;
+  const values = Object.values(obj).map(v => Number(v) || 0);
+  if(!values.length) return 0;
+  return values.reduce((a,b)=>a+b,0) / values.length;
+}
+
+function clamp(value, min, max){
+  return Math.max(min, Math.min(max, value));
+}
+
+function formatPlayTimeFromMinutes(totalMinutes){
+  const rounded = Math.round(totalMinutes);
+  if(rounded < 60) return `${rounded} min`;
+  const hours = Math.floor(rounded / 60);
+  const minutes = rounded % 60;
+  return minutes === 0 ? `${hours} h` : `${hours} h ${minutes} min`;
+}
+
+function calculateAudienceMetrics(profile){
+  const scores = profile.scores || {};
+  const scoreValues = Object.values(scores).map(v => Number(v) || 0);
+  const scoreAvg = scoreValues.length
+    ? scoreValues.reduce((a,b)=>a+b,0) / scoreValues.length
+    : 50;
+
+  const locationAvg = averageValues(profile.bars?.Location);
+  const consumptionAvg = averageValues(profile.bars?.Consumption);
+  const trafficAvg = averageValues(profile.bars?.Traffic);
+
+  const social = scores.SocialMotivation || 40;
+  const competition = scores.CompetitionDrive || 30;
+  const timeAvailable = scores.TimeAvailable || 40;
+  const tech = scores.TechTolerance || 40;
+  const story = scores.StoryInterest || 35;
+  const risk = scores.RiskAversion || 40;
+  const price = scores.PriceSensitivity || 50;
+  const collecting = scores.CollectingAffinity || 20;
+
+  let dominantType = "balanced";
+  const maxScore = Math.max(...Object.values(scores));
+
+  if(maxScore === competition) dominantType = "competitive";
+  else if(maxScore === story) dominantType = "story";
+  else if(maxScore === social) dominantType = "social";
+  else if(maxScore === collecting) dominantType = "collector";
+  else if(maxScore === price) dominantType = "budget";
+  else if(maxScore === tech) dominantType = "technical";
+  else if(maxScore === risk) dominantType = "cautious";
+
+  let engagementBase =
+    (scoreAvg * 0.35) +
+    (trafficAvg * 0.25) +
+    (consumptionAvg * 0.20) +
+    (locationAvg * 0.10) +
+    (competition * 0.05) +
+    (story * 0.05);
+
+  if(dominantType === "competitive") engagementBase += 10;
+  if(dominantType === "social") engagementBase += 7;
+  if(dominantType === "story") engagementBase += 5;
+  if(dominantType === "budget") engagementBase -= 8;
+  if(dominantType === "cautious") engagementBase -= 5;
+
+  engagementBase = clamp(Math.round(engagementBase), 18, 96);
+
+  let ctrBase =
+    (trafficAvg * 0.55) +
+    (social * 0.20) +
+    (competition * 0.15) +
+    (story * 0.10);
+
+  if(dominantType === "social") ctrBase += 12;
+  if(dominantType === "competitive") ctrBase += 8;
+  if(dominantType === "budget") ctrBase += 5;
+  if(dominantType === "collector") ctrBase -= 6;
+
+  const ctr = clamp(Number((ctrBase / 10).toFixed(1)), 1.2, 14.5);
+
+  let playMinutes =
+    20 +
+    (timeAvailable * 1.4) +
+    (competition * 0.7) +
+    (story * 0.6) +
+    (tech * 0.35) +
+    (collecting * 0.3) +
+    (trafficAvg * 0.2);
+
+  if(dominantType === "competitive") playMinutes += 28;
+  if(dominantType === "story") playMinutes += 22;
+  if(dominantType === "collector") playMinutes += 16;
+  if(dominantType === "social") playMinutes += 8;
+  if(dominantType === "budget") playMinutes -= 18;
+  if(dominantType === "cautious") playMinutes -= 10;
+
+  playMinutes = clamp(Math.round(playMinutes), 20, 240);
+
+  let retentionBase =
+    (engagementBase * 0.28) +
+    (story * 0.20) +
+    (timeAvailable * 0.18) +
+    (risk * 0.12) +
+    (collecting * 0.12) +
+    (tech * 0.10);
+
+  retentionBase -= (price * 0.12);
+
+  if(dominantType === "collector") retentionBase += 10;
+  if(dominantType === "story") retentionBase += 8;
+  if(dominantType === "competitive") retentionBase += 6;
+  if(dominantType === "budget") retentionBase -= 12;
+  if(dominantType === "social") retentionBase -= 4;
+
+  const retention = clamp(Math.round(retentionBase), 20, 92);
+
+  const growthPressure =
+    (trafficAvg * 0.24) +
+    (social * 0.16) +
+    (competition * 0.22) +
+    (story * 0.16) +
+    (timeAvailable * 0.12) +
+    (tech * 0.10);
+
+  const lossPressure =
+    (price * 0.30) +
+    ((100 - risk) * 0.18) +
+    ((100 - tech) * 0.18) +
+    ((100 - timeAvailable) * 0.18) +
+    ((100 - trafficAvg) * 0.16);
+
+  let netTrend = growthPressure - lossPressure;
+
+  if(dominantType === "competitive") netTrend += 10;
+  if(dominantType === "social") netTrend += 6;
+  if(dominantType === "story") netTrend += 4;
+  if(dominantType === "collector") netTrend += 3;
+  if(dominantType === "budget") netTrend -= 12;
+  if(dominantType === "cautious") netTrend -= 7;
+
+  let start = clamp(engagementBase - 18, 8, 90);
+  let trend = [start];
+
+  const step1 = clamp(Math.round(netTrend / 8), -14, 14);
+  const step2 = clamp(Math.round(netTrend / 9), -13, 13);
+  const step3 = clamp(Math.round(netTrend / 10), -12, 12);
+  const step4 = clamp(Math.round(netTrend / 11), -11, 11);
+  const step5 = clamp(Math.round(netTrend / 12), -10, 10);
+
+  const steps = [
+    step1,
+    step2 + (retention >= 70 ? 2 : -2),
+    step3 + (story >= 70 ? 2 : 0),
+    step4 + (price >= 80 ? -3 : 0),
+    step5 + (trafficAvg >= 50 ? 2 : -2)
+  ];
+
+  for(let i=0;i<steps.length;i++){
+    const next = clamp(trend[trend.length - 1] + steps[i], 5, 99);
+    trend.push(next);
+  }
+
+  trend[5] = clamp(Math.round((trend[5] * 0.6) + (engagementBase * 0.4)), 5, 99);
+
+  const isLosing = trend[5] < trend[0];
+  const delta = trend[5] - trend[0];
+  const topScoreKey = Object.keys(scores).sort((a,b)=>(scores[b]||0)-(scores[a]||0))[0] || "sin datos";
+  const topScoreVal = scores[topScoreKey] || 0;
+
+  let summary = "";
+  if(isLosing){
+    summary =
+      `${profile.name} está perdiendo engagement (${delta} pts en la tendencia). ` +
+      `Su perfil dominante es ${dominantType} y, aunque ${topScoreKey} lidera con ${topScoreVal}/100, ` +
+      `las señales de desgaste pesan más que el impulso actual.`;
+  } else {
+    summary =
+      `${profile.name} mantiene o mejora su engagement (+${delta} pts en la tendencia). ` +
+      `Su perfil dominante es ${dominantType} y ${topScoreKey} (${topScoreVal}/100) empuja una curva claramente más fuerte.`;
+  }
+
+  return {
+    engagement: `${engagementBase}%`,
+    engagementValue: engagementBase,
+    ctr: `${ctr}%`,
+    time: formatPlayTimeFromMinutes(playMinutes),
+    timeMinutes: playMinutes,
+    retention: `${retention}%`,
+    trend,
+    isLosing,
+    summary
+  };
+}
+
+function updateEngagementModule(){
+  const select = document.getElementById("engagementAudienceSelect");
+  if(!select || !select.value) return;
+
+  const profile = audienceProfiles.find(a => a.name === select.value);
+  if(!profile) return;
+
+  const data = calculateAudienceMetrics(profile);
+
+  document.getElementById("engRate").textContent = data.engagement;
+  document.getElementById("engCTR").textContent = data.ctr;
+  document.getElementById("engTime").textContent = data.time;
+  document.getElementById("engRetention").textContent = data.retention;
+  document.getElementById("engagementSummaryText").textContent = data.summary;
+
+  drawEngagementChart(data.trend, profile.name, data.isLosing);
+  drawGeneralEngagementChart(profile.name);
+}
+
+function drawEngagementChart(trend, name, isLosing){
+  const canvas = document.getElementById("engagementChart");
+  if(!canvas) return;
+  const ctx = canvas.getContext("2d");
+
+  if(engagementChart){
+    engagementChart.destroy();
+  }
+
+  engagementChart = new Chart(ctx,{
+    type:"line",
+    data:{
+      labels:["Semana 1","Semana 2","Semana 3","Semana 4","Semana 5","Semana 6"],
+      datasets:[{
+        label: isLosing ? "Engagement en descenso - " + name : "Engagement - " + name,
+        data:trend,
+        borderColor: isLosing ? "#B00020" : "#003791",
+        backgroundColor: isLosing ? "rgba(176,0,32,0.15)" : "rgba(0,112,209,0.2)",
+        tension:.35,
+        fill:true,
+        pointBackgroundColor: isLosing ? "#B00020" : "#0070D1",
+        pointRadius:4,
+        pointHoverRadius:6,
+        borderWidth:3
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+        layout:{padding:{top:28,right:78,bottom:18,left:18}},
+      plugins:{ legend:{display:true} },
+      scales:{
+        y:{
+          beginAtZero:true,
+          max:100,
+          ticks:{ callback:function(value){ return value + "%"; } }
+        }
+      }
+    }
+  });
+}
+
+function drawGeneralEngagementChart(selectedName){
+  const canvas = document.getElementById("generalEngagementChart");
+  if(!canvas) return;
+  const ctx = canvas.getContext("2d");
+
+  const labels = [];
+  const values = [];
+  const backgroundColors = [];
+  const borderColors = [];
+
+  audienceProfiles.forEach(profile=>{
+    const metrics = calculateAudienceMetrics(profile);
+    labels.push(profile.name);
+    values.push(metrics.engagementValue);
+    backgroundColors.push(profile.name === selectedName ? "rgba(0,168,232,0.35)" : "rgba(0,112,209,0.18)");
+    borderColors.push(profile.name === selectedName ? "#00A8E8" : "#003791");
+  });
+
+  if(generalEngagementChart){
+    generalEngagementChart.destroy();
+  }
+
+  generalEngagementChart = new Chart(ctx,{
+    type:"bar",
+    data:{
+      labels,
+      datasets:[{
+        label:"Engagement general por audiencia",
+        data:values,
+        backgroundColor:backgroundColors,
+        borderColor:borderColors,
+        borderWidth:1.5
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+        layout:{padding:{top:28,right:78,bottom:18,left:18}},
+      plugins:{ legend:{display:true} },
+      scales:{
+        x:{
+          ticks:{
+            maxRotation:75,
+            minRotation:75,
+            autoSkip:false
+          }
+        },
+        y:{
+          beginAtZero:true,
+          max:100,
+          ticks:{ callback:function(value){ return value + "%"; } }
+        }
+      }
+    }
+  });
+}
+
+
+/* ALCANCE POR CANAL */
+const channelCatalog = [
+  { key:"redes", label:"Redes", aliases:["TikTok","Instagram","Facebook","Discord","Reddit","X"] },
+  { key:"correo", label:"Correo", aliases:["Newsletters","Newsletter","Email","Correo"] },
+  { key:"pauta", label:"Pauta", aliases:["Ads","TV","TV/Streaming ads","Paid Media"] },
+  { key:"influencers", label:"Influencers", aliases:["YouTube","Twitch","Streamers"] },
+  { key:"busqueda", label:"Búsqueda", aliases:["Search","SEO","SEM"] },
+  { key:"web", label:"Web / Landing", aliases:["Web","Web/Reviews","Web/deals","Forums","Foros"] }
+];
+
+let channelReachChart = null;
+
+function mapTrafficToChannelWeight(trafficSources){
+  const weights = {};
+  channelCatalog.forEach(channel => weights[channel.key] = 0);
+
+  (trafficSources || []).forEach((source, index) => {
+    const found = channelCatalog.find(channel =>
+      channel.aliases.some(alias => source.toLowerCase().includes(alias.toLowerCase()))
+    );
+
+    const key = found ? found.key : "web";
+    const base = index === 0 ? 1 : index === 1 ? 0.75 : 0.55;
+    weights[key] += base;
+  });
+
+  if(Object.values(weights).every(v => v === 0)){
+    weights.redes = 1;
+    weights.web = 0.8;
+  }
+
+  return weights;
+}
+
+function riskLabelClass(value){
+  if(value >= 67) return { label:"Alto", className:"risk-high" };
+  if(value >= 40) return { label:"Medio", className:"risk-mid" };
+  return { label:"Bajo", className:"risk-low" };
+}
+
+function calculateChannelMetrics(profile){
+  const scores = profile.scores || {};
+  const totalAudience = Math.max(1, audienceStats[audienceProfiles.findIndex(a => a.name === profile.name)] || 1);
+  const trafficWeights = mapTrafficToChannelWeight(profile.trafficSources);
+  const social = scores.SocialMotivation || 45;
+  const competition = scores.CompetitionDrive || 35;
+  const story = scores.StoryInterest || 40;
+  const tech = scores.TechTolerance || 45;
+  const riskAversion = scores.RiskAversion || 45;
+  const price = scores.PriceSensitivity || 50;
+  const timeAvailable = scores.TimeAvailable || 40;
+  const collecting = scores.CollectingAffinity || 25;
+  const trafficAvg = averageValues(profile.bars?.Traffic) || 35;
+  const locationAvg = averageValues(profile.bars?.Location) || 35;
+
+  const baseUniverse = Math.round(
+    5000 +
+    (social * 80) +
+    (competition * 65) +
+    (story * 55) +
+    (tech * 35) +
+    (timeAvailable * 45) +
+    (locationAvg * 40) +
+    (trafficAvg * 50) +
+    (totalAudience * 220)
+  );
+
+  const metrics = channelCatalog.map((channel, index) => {
+    const weight = trafficWeights[channel.key] || 0.25;
+    const channelStrength =
+      (weight * 28) +
+      (trafficAvg * 0.32) +
+      (social * (channel.key === "redes" ? 0.30 : 0.10)) +
+      (story * (channel.key === "correo" ? 0.24 : 0.08)) +
+      (competition * (channel.key === "influencers" ? 0.18 : 0.07)) +
+      (tech * (channel.key === "web" ? 0.14 : 0.05));
+
+    const reachRatio = clamp(channelStrength / 100, 0.18, 0.88);
+    const reach = Math.round(baseUniverse * reachRatio);
+
+    const piecesBase =
+      3 +
+      Math.round(weight * 4) +
+      (channel.key === "redes" ? 3 : 0) +
+      (channel.key === "pauta" ? 2 : 0) +
+      (channel.key === "correo" ? 1 : 0);
+
+    const pieces = clamp(piecesBase + Math.round((social + story + competition) / 75), 3, 16);
+    const impressions = Math.round(reach * (1.6 + (weight * 0.9) + (trafficAvg / 120) + (timeAvailable / 200)));
+    const frequency = Number((impressions / Math.max(reach, 1)).toFixed(2));
+
+    let engagedPctBase =
+      (social * (channel.key === "redes" ? 0.38 : 0.16)) +
+      (story * (channel.key === "correo" ? 0.34 : 0.18)) +
+      (competition * (channel.key === "influencers" ? 0.28 : 0.14)) +
+      (tech * (channel.key === "web" ? 0.22 : 0.10)) +
+      (trafficAvg * 0.18) -
+      (price * 0.08);
+
+    if(channel.key === "pauta") engagedPctBase -= 4;
+    if(channel.key === "busqueda") engagedPctBase += 2;
+    if(channel.key === "correo") engagedPctBase += collecting * 0.08;
+
+    const engagedPct = clamp(Math.round(engagedPctBase / 1.9), 12, 82);
+
+    let riskBase =
+      (riskAversion * 0.34) +
+      (price * 0.22) +
+      ((100 - tech) * 0.16) +
+      ((100 - trafficAvg) * 0.12) +
+      ((frequency > 2.8 ? frequency * 11 : frequency * 7));
+
+    if(channel.key === "pauta") riskBase += 10;
+    if(channel.key === "correo") riskBase += 6;
+    if(channel.key === "redes") riskBase += 4;
+    if(channel.key === "busqueda") riskBase -= 6;
+    if(channel.key === "web") riskBase -= 4;
+
+    const riskValue = clamp(Math.round(riskBase / 1.55), 12, 92);
+    const riskMeta = riskLabelClass(riskValue);
+
+    return {
+      channel: channel.label,
+      reach,
+      pieces,
+      impressions,
+      frequency,
+      engagedPct,
+      riskValue,
+      riskLabel: riskMeta.label,
+      riskClass: riskMeta.className
+    };
+  });
+
+  metrics.sort((a,b) => b.reach - a.reach);
+  return metrics;
+}
+
+function populateChannelAudienceSelect(){
+  const select = document.getElementById("channelAudienceSelect");
+  if(!select) return;
+
+  select.innerHTML = "";
+  audienceProfiles.forEach(profile => {
+    const option = document.createElement("option");
+    option.value = profile.name;
+    option.textContent = profile.name;
+    select.appendChild(option);
+  });
+
+  select.onchange = updateChannelModule;
+}
+
+function formatNumber(num){
+  return Number(num || 0).toLocaleString("es-CO");
+}
+
+function updateChannelModule(){
+  const select = document.getElementById("channelAudienceSelect");
+  if(!select || !select.value) return;
+
+  const profile = audienceProfiles.find(a => a.name === select.value);
+  if(!profile) return;
+
+  const metrics = calculateChannelMetrics(profile);
+  const totalReach = metrics.reduce((sum, item) => sum + item.reach, 0);
+  const avgFrequency = (metrics.reduce((sum, item) => sum + item.frequency, 0) / metrics.length).toFixed(2);
+  const avgEngaged = Math.round(metrics.reduce((sum, item) => sum + item.engagedPct, 0) / metrics.length);
+  const topChannel = metrics[0];
+  const lowRiskChannel = [...metrics].sort((a,b) => a.riskValue - b.riskValue)[0];
+  const highEngagementChannel = [...metrics].sort((a,b) => b.engagedPct - a.engagedPct)[0];
+
+  document.getElementById("topChannelName").textContent = topChannel.channel;
+  document.getElementById("channelTotalReach").textContent = formatNumber(totalReach);
+  document.getElementById("channelAvgFrequency").textContent = avgFrequency + "x";
+  document.getElementById("channelAvgEngaged").textContent = avgEngaged + "%";
+
+  const tbody = document.getElementById("channelMetricsTable");
+  tbody.innerHTML = metrics.map(item => `
+    <tr>
+      <td><b>${item.channel}</b></td>
+      <td>${formatNumber(item.reach)}</td>
+      <td>${item.pieces}</td>
+      <td>${item.frequency}x</td>
+      <td>${item.engagedPct}%</td>
+      <td><span class="risk-pill ${item.riskClass}">${item.riskLabel}</span></td>
+    </tr>
+  `).join("");
+
+  document.getElementById("channelInsightText").textContent =
+    `${profile.name} concentra su mejor alcance en ${topChannel.channel}, mientras que ${highEngagementChannel.channel} es el canal con mayor porcentaje de audiencia enganchada.`;
+
+  document.getElementById("channelInsightList").innerHTML = `
+    <li><b>${topChannel.channel}</b> lidera con un alcance estimado de ${formatNumber(topChannel.reach)} y ${topChannel.pieces} piezas publicitarias.</li>
+    <li>La <b>frecuencia media</b> del mix es ${avgFrequency}x, útil para medir presión publicitaria sin sonar a spam corporativo.</li>
+    <li><b>${highEngagementChannel.channel}</b> consigue el mejor enganche (${highEngagementChannel.engagedPct}%), ideal para creatividades de respuesta.</li>
+    <li><b>${lowRiskChannel.channel}</b> presenta el riesgo más bajo (${lowRiskChannel.riskLabel.toLowerCase()}), por lo que sirve como canal de estabilidad.</li>
+  `;
+
+  drawChannelReachChart(metrics, profile.name);
+}
+
+function drawChannelReachChart(metrics, audienceName){
+  const canvas = document.getElementById("channelReachChart");
+  if(!canvas) return;
+  const ctx = canvas.getContext("2d");
+
+  if(channelReachChart){
+    channelReachChart.destroy();
+  }
+
+  const normalizar = (valor, maximo, salidaMax = 100) => {
+    if(!maximo || maximo <= 0) return 0;
+    return Number(((valor / maximo) * salidaMax).toFixed(2));
+  };
+
+  const riskWeight = { Bajo: 26, Medio: 48, Alto: 70 };
+  const maxFrequency = Math.max(...metrics.map(item => item.frequency), 1);
+  const maxEngagement = Math.max(...metrics.map(item => item.engagedPct), 1);
+
+  const channelPoints = metrics.map(item => {
+    const frecuenciaNormalizada = normalizar(item.frequency, maxFrequency, 100);
+    const engagementNormalizado = normalizar(item.engagedPct, maxEngagement, 100);
+    const risk = Number((((riskWeight[item.riskLabel] * 0.68) + (frecuenciaNormalizada * 0.22) + 8) * 0.8 + 10).toFixed(2));
+    const expectedReturn = Number((((engagementNormalizado * 0.9) + 14) * 0.95).toFixed(2));
+    return {
+      channel: item.channel,
+      x: Math.min(82, Math.max(14, risk)),
+      y: Math.min(106, Math.max(20, expectedReturn)),
+      reach: item.reach,
+      pieces: item.pieces,
+      frequency: item.frequency,
+      engagedPct: item.engagedPct,
+      riskLabel: item.riskLabel
+    };
+  }).sort((a,b) => a.x - b.x || b.y - a.y);
+
+  const minHorizontalGap = 8;
+  const minVerticalGap = 12;
+  for(let i = 1; i < channelPoints.length; i++){
+    const prev = channelPoints[i - 1];
+    const curr = channelPoints[i];
+    if(Math.abs(curr.x - prev.x) < minHorizontalGap){
+      curr.x = Number(Math.min(90, prev.x + minHorizontalGap).toFixed(2));
+    }
+    if(Math.abs(curr.y - prev.y) < minVerticalGap){
+      const direction = i % 2 === 0 ? 1 : -1;
+      curr.y = Number(Math.max(16, Math.min(112, prev.y + (minVerticalGap * direction))).toFixed(2));
+      if(Math.abs(curr.y - prev.y) < minVerticalGap){
+        curr.y = Number(Math.max(16, Math.min(112, prev.y + minVerticalGap + 2)).toFixed(2));
+      }
+    }
+  }
+
+  const frontier = [];
+  let bestReturn = -Infinity;
+  channelPoints.forEach(point => {
+    if(point.y > bestReturn){
+      frontier.push(point);
+      bestReturn = point.y;
+    }
+  });
+
+  const rf = 18;
+  const ideal = frontier.reduce((best, point) => {
+    const sharpe = (point.y - rf) / Math.max(point.x, 1);
+    if(!best || sharpe > best.sharpe){
+      return { ...point, sharpe };
+    }
+    return best;
+  }, null);
+
+  const minX = 0;
+  const maxX = 100;
+  const minY = 0;
+  const maxY = 132;
+  const curvature = 0.015;
+  const frontierPeakX = Math.max(ideal.x + 18, 62);
+  const frontierPeakY = Math.min(ideal.y + 10, 102);
+  const frontierLeftX = Math.max(ideal.x - 1.5, 18);
+  const frontierLine = [];
+  for(let x = frontierLeftX; x <= 84; x += 2){
+    const y = frontierPeakY - curvature * Math.pow(x - frontierPeakX, 2);
+    frontierLine.push({x:Number(x.toFixed(2)), y:Number(Math.max(16, Math.min(108, y)).toFixed(2))});
+  }
+
+  const cmlSlope = (ideal.y - rf) / Math.max(ideal.x, 1);
+  const cmlLine = [
+    {x: 0, y: rf},
+    {x: ideal.x, y: ideal.y},
+    {x: 84, y: Number(Math.min(88, (rf + cmlSlope * 84)).toFixed(2))}
+  ];
+
+  const pointLabelPlugin = {
+    id: 'pointLabelPlugin',
+    afterDatasetsDraw(chart){
+      const {ctx, chartArea} = chart;
+      const placed = [];
+      const overlaps = (a, b) => !(a.x + a.w < b.x || b.x + b.w < a.x || a.y + a.h < b.y || b.y + b.h < a.y);
+      const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+      ctx.save();
+      ctx.font = '12px Orbitron, sans-serif';
+      chart.data.datasets.forEach((dataset, datasetIndex) => {
+        if(dataset.label !== 'Canales') return;
+        const meta = chart.getDatasetMeta(datasetIndex);
+        meta.data.forEach((element, index) => {
+          const point = dataset.data[index];
+          const label = point.channel;
+          const width = ctx.measureText(label).width;
+          const positions = [
+            {dx: 12, dy: -14},
+            {dx: 12, dy: 18},
+            {dx: -width - 12, dy: -14},
+            {dx: -width - 12, dy: 18},
+            {dx: 16, dy: -28},
+            {dx: -width - 16, dy: 30},
+            {dx: 18, dy: 32},
+            {dx: -width - 18, dy: -28}
+          ];
+          let box = null;
+          for(const pos of positions){
+            const candidate = {
+              x: clamp(element.x + pos.dx, chartArea.left + 4, chartArea.right - width - 4),
+              y: clamp(element.y + pos.dy - 10, chartArea.top + 4, chartArea.bottom - 16),
+              w: width,
+              h: 14
+            };
+            if(!placed.some(existing => overlaps(candidate, existing))){
+              box = candidate;
+              break;
+            }
+          }
+          if(!box){
+            box = {
+              x: clamp(element.x + 14, chartArea.left + 4, chartArea.right - width - 4),
+              y: clamp(element.y - 24 + (index * 16), chartArea.top + 4, chartArea.bottom - 16),
+              w: width,
+              h: 14
+            };
+          }
+          placed.push(box);
+          ctx.fillStyle = '#4f2d7f';
+          ctx.fillText(label, box.x, box.y + 11);
+        });
+      });
+      const idealMeta = chart.getDatasetMeta(2);
+      if(idealMeta && idealMeta.data && idealMeta.data[0]){
+        ctx.fillStyle = '#ff4d4f';
+        ctx.font = 'bold 12px Orbitron, sans-serif';
+        const idealText = 'Ideal Market Mix';
+        const idealWidth = ctx.measureText(idealText).width;
+        const idealX = clamp(idealMeta.data[0].x + 12, chartArea.left + 4, chartArea.right - idealWidth - 4);
+        const idealY = clamp(idealMeta.data[0].y - 20, chartArea.top + 4, chartArea.bottom - 16);
+        ctx.fillText(idealText, idealX, idealY);
+      }
+      if(chart.scales && chart.scales.x && chart.scales.y){
+        ctx.fillStyle = '#111111';
+        ctx.font = 'bold 12px Orbitron, sans-serif';
+        ctx.fillText('Capital Market Line', chart.scales.x.left + 118, chart.scales.y.top + 34);
+        ctx.fillStyle = '#2f63ff';
+        ctx.fillText('Efficient Frontier', chart.scales.x.left + 82, chart.scales.y.top + 138);
+        ctx.fillStyle = '#111111';
+        ctx.fillText('Risk Free %', chart.scales.x.left + 8, chart.scales.y.getPixelForValue(rf) + 14);
+      }
+      ctx.restore();
+    }
+  };
+
+  channelReachChart = new Chart(ctx,{
+    type:'scatter',
+    data:{
+      datasets:[
+        {
+          label:'Canales',
+          data: channelPoints,
+          pointRadius:7,
+          pointHoverRadius:9,
+          pointBackgroundColor:'rgba(108,43,217,0.16)',
+          pointBorderColor:'#6c2bd9',
+          pointBorderWidth:3,
+          showLine:false
+        },
+        {
+          label:'Efficient Frontier',
+          data: frontierLine,
+          type:'line',
+          borderColor:'#2f63ff',
+          backgroundColor:'rgba(47,99,255,0.08)',
+          borderWidth:4,
+          tension:0.25,
+          pointRadius:0,
+          fill:false
+        },
+        {
+          label:'Mix ideal',
+          data:[ideal],
+          pointRadius:8,
+          pointHoverRadius:10,
+          pointBackgroundColor:'#ffffff',
+          pointBorderColor:'#ff4d4f',
+          pointBorderWidth:4,
+          showLine:false
+        },
+        {
+          label:'Capital Market Line',
+          data: cmlLine,
+          type:'line',
+          borderColor:'#111111',
+          borderWidth:3,
+          tension:0,
+          pointRadius:0,
+          fill:false
+        },
+        {
+          label:'Risk Free',
+          data:[{x:0, y:rf}],
+          pointRadius:4,
+          pointBackgroundColor:'#111111',
+          pointBorderColor:'#111111'
+        }
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+        layout:{padding:{top:28,right:78,bottom:18,left:18}},
+      plugins:{
+        legend:{display:true, labels:{boxWidth:14, boxHeight:8, font:{size:11}}},
+        title:{display:true,text:'Frontera eficiente de canales · ' + audienceName, font:{size:14}},
+        tooltip:{
+          callbacks:{
+            label:function(context){
+              const raw = context.raw || {};
+              if(context.dataset.label === 'Canales' || context.dataset.label === 'Mix ideal'){
+                return [
+                  (raw.channel || context.dataset.label) + ': retorno ' + raw.y + ' pts',
+                  'Riesgo: ' + raw.x.toFixed(2) + ' pts',
+                  'Alcance: ' + formatNumber(raw.reach || 0),
+                  'Piezas: ' + (raw.pieces || 0),
+                  'Frecuencia: ' + (raw.frequency || 0) + 'x',
+                  'Engaged: ' + (raw.engagedPct || 0) + '%',
+                  'Riesgo cualitativo: ' + (raw.riskLabel || 'n/a')
+                ];
+              }
+              return context.dataset.label + ': (' + context.parsed.x.toFixed(2) + ', ' + context.parsed.y.toFixed(2) + ')';
+            }
+          }
+        }
+      },
+      scales:{
+        x:{
+          title:{display:true,text:'Expected Risk (escala aproximada)', font:{size:11}},
+          min:minX,
+          max:maxX,
+          ticks:{font:{size:10}, stepSize:20},
+          grid:{display:false}
+        },
+        y:{
+          title:{display:true,text:'Expected Return (escala aproximada)', font:{size:11}},
+          min:minY,
+          max:maxY,
+          ticks:{font:{size:10}, stepSize:20},
+          grid:{display:false}
+        }
+      }
+    },
+    plugins:[pointLabelPlugin]
+  });
+
+  const secondary = channelPoints.filter(point => point.channel !== ideal.channel).sort((a,b) => a.x - b.x || b.y - a.y)[0];
+  const frontierNames = frontier.map(item => item.channel).join(', ');
+  const summary = document.getElementById('channelFrontierSummary');
+  const bullets = document.getElementById('channelFrontierBullets');
+  if(summary){
+    summary.textContent = audienceName + ' muestra una frontera eficiente más extendida: ' + ideal.channel + ' queda como punto ideal con un retorno aproximado de ' + ideal.y + ' pts y un riesgo de ' + ideal.x.toFixed(2) + ' pts. Amplié el eje Y, aumenté la altura del gráfico y reubiqué las etiquetas para que ningún título de canal se cruce con otro.';
+  }
+  if(bullets){
+    bullets.innerHTML = `
+      <li><b>Escala aproximada:</b> los ejes usan valores normalizados y el eje Y se extendió ligeramente hasta 132 para separar mejor los canales y hacer más legible el retorno esperado.</li>
+      <li><b>Frontera eficiente:</b> la curva azul marca la envolvente de mejor retorno por unidad de riesgo. En esta audiencia los canales más cercanos son ${frontierNames}.</li>
+      <li><b>Mix ideal:</b> el punto rojo destaca a <b>${ideal.channel}</b>, porque ofrece la mejor relación entre engagement esperado y riesgo del canal dentro de esta escala.</li>
+      <li><b>Capital Market Line:</b> la recta negra parte del rendimiento base y toca el mix ideal. Los canales más cerca de esa recta se comportan como activos competitivos dentro del portafolio.</li>
+      <li><b>Lectura táctica:</b> ${secondary ? secondary.channel + ' puede servir como apoyo para diversificar el mix sin sobredimensionar el riesgo total.' : 'el portafolio sigue muy concentrado, así que conviene ensayar un segundo canal para diversificar mejor.'}</li>
+    `;
+  }
+}
+
+
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- CLUSTERING DBSCAN MODULE                                    -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="clustering">
+  <h1>🔬 Clustering DBSCAN</h1>
+  <button onclick="showSection('menu')">Volver</button>
+
+  <div class="cl-box">
+
+    <!-- STEP 1: Configuración -->
+    <div class="cl-step">
+      <h3>⚙️ Paso 1 — Configuración del análisis</h3>
+      <div class="cl-row">
+        <span class="cl-label">Fuente de datos:</span>
+        <select class="cl-input" id="clDataSource" onchange="clToggleEndpoint()" style="flex:0 0 220px">
+          <option value="internal">Audiencias internas (esta página)</option>
+          <option value="api">Endpoint externo (Bearer Token)</option>
+        </select>
+      </div>
+      <div id="clApiConfig" style="display:none">
+        <div class="cl-row">
+          <span class="cl-label">Endpoint URL:</span>
+          <input class="cl-input" id="clEndpointUrl" type="url" placeholder="https://api.example.com/v1/audiences">
+        </div>
+        <div class="cl-row">
+          <span class="cl-label">API Key (Bearer):</span>
+          <input class="cl-input" id="clApiKey" type="password" placeholder="••••••••••••••••">
+        </div>
+        <button onclick="clFetchFromApi()" style="margin-top:4px">Conectar y traer datos</button>
+      </div>
+      <div class="cl-row" style="margin-top:12px">
+        <span class="cl-label">Métricas a usar:</span>
+        <label style="font-size:.8rem;cursor:pointer"><input type="checkbox" id="clUsePriceSens" checked> Sensibilidad precio</label>
+        <label style="font-size:.8rem;cursor:pointer"><input type="checkbox" id="clUseCompDrive" checked> Drive competitivo</label>
+        <label style="font-size:.8rem;cursor:pointer"><input type="checkbox" id="clUseTimeAvail" checked> Tiempo disponible</label>
+        <label style="font-size:.8rem;cursor:pointer"><input type="checkbox" id="clUseSocial" checked> Motivación social</label>
+        <label style="font-size:.8rem;cursor:pointer"><input type="checkbox" id="clUseTech" checked> Tolerancia tech</label>
+        <label style="font-size:.8rem;cursor:pointer"><input type="checkbox" id="clUseStory" checked> Interés en historia</label>
+        <label style="font-size:.8rem;cursor:pointer"><input type="checkbox" id="clUseCollect" checked> Coleccionismo</label>
+        <label style="font-size:.8rem;cursor:pointer"><input type="checkbox" id="clUseRisk" checked> Aversión al riesgo</label>
+      </div>
+      <div class="cl-row" style="margin-top:8px">
+        <span class="cl-label">eps (auto si 0):</span>
+        <input class="cl-input" id="clEpsManual" type="number" step="0.01" min="0" value="0" style="flex:0 0 100px" placeholder="0 = auto">
+        <span class="cl-label">min_samples:</span>
+        <input class="cl-input" id="clMinSamples" type="number" min="2" value="2" style="flex:0 0 80px">
+        <button onclick="clRunClustering()">🚀 Ejecutar DBSCAN</button>
+      </div>
+      <div class="cl-log" id="clLog">Esperando ejecución...</div>
+    </div>
+
+    <!-- STEP 2: KPIs y resultados -->
+    <div class="cl-step" id="clResultsStep" style="display:none">
+      <h3>📊 Paso 2 — Resultados del clustering</h3>
+      <div class="cl-kpis">
+        <div class="cl-kpi"><b>Segmentos</b><span id="clKpiClusters">—</span></div>
+        <div class="cl-kpi"><b>Audiencias</b><span id="clKpiTotal">—</span></div>
+        <div class="cl-kpi"><b>Silhouette</b><span id="clKpiSil">—</span></div>
+        <div class="cl-kpi"><b>eps usado</b><span id="clKpiEps">—</span></div>
+        <div class="cl-kpi"><b>Anomalías</b><span id="clKpiAnom">—</span></div>
+      </div>
+
+      <div class="cl-chart-wrap">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+          <h4 style="margin:0">Scatter PCA 2D</h4>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="cl-label" style="font-size:.78rem">Colorear por:</span>
+            <select class="cl-input" id="clColorMode" onchange="clUpdateScatterColor()" style="flex:none;padding:7px 10px;font-size:.78rem;min-width:160px;">
+              <option value="cluster">Segmento / Cluster</option>
+              <option value="PriceSensitivity">Sensibilidad al precio</option>
+              <option value="CompetitionDrive">Drive competitivo</option>
+              <option value="TimeAvailable">Tiempo disponible</option>
+              <option value="SocialMotivation">Motivación social</option>
+              <option value="TechTolerance">Tolerancia tech</option>
+              <option value="StoryInterest">Interés en historia</option>
+              <option value="CollectingAffinity">Coleccionismo</option>
+              <option value="RiskAversion">Aversión al riesgo</option>
+            </select>
+          </div>
+        </div>
+        <canvas id="clScatterChart" style="width:100%;height:380px"></canvas>
+        <div id="clScatterLegend" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;font-size:.75rem;"></div>
+      </div>
+
+      <!-- Canvases ocultos requeridos por las funciones heredadas -->
+      <canvas id="clBarChart" style="display:none"></canvas>
+      <canvas id="clHeatChart" style="display:none"></canvas>
+      <canvas id="clSilChart" style="display:none"></canvas>
+    </div>
+
+    <!-- STEP 3: Selección de audiencia -->
+    <div class="cl-step" id="clSelectStep" style="display:none">
+      <h3>🎯 Paso 3 — Elige un segmento para análisis detallado</h3>
+      <p style="font-size:.83rem;color:#6688bb;margin-bottom:14px">
+        Haz clic en una tarjeta para ver el perfil estadístico completo, fortalezas, debilidades,
+        estrategia de activación e insights accionables.
+      </p>
+      <div class="cl-seg-list" id="clSegCards"></div>
+    </div>
+
+    <!-- STEP 4: Drilldown detallado -->
+    <div class="cl-step" id="clDrillStep" style="display:none">
+      <div class="cl-drill-header">
+        <span class="cl-drill-title" id="clDrillTitle">—</span>
+        <button onclick="clCloseDrill()" style="padding:8px 16px;font-size:.8rem">✕ Cerrar</button>
+      </div>
+
+      <div class="cl-grid3" style="margin-bottom:18px">
+        <div class="cl-kpi"><b>Usuarios en segmento</b><span id="clDrillN">—</span></div>
+        <div class="cl-kpi"><b>% del total</b><span id="clDrillPct">—</span></div>
+        <div class="cl-kpi"><b>Variable clave</b><span id="clDrillVar">—</span></div>
+      </div>
+
+      <div class="cl-drill-grid">
+        <!-- Tabla estadística -->
+        <div>
+          <h4 style="font-size:.88rem;color:#003791;margin-bottom:10px">📊 Perfil estadístico vs. total</h4>
+          <table class="cl-stat-table">
+            <thead><tr><th>Variable</th><th>Este seg.</th><th>Total avg</th><th>Δ%</th><th>Z-score</th></tr></thead>
+            <tbody id="clDrillTable"></tbody>
+          </table>
+        </div>
+
+        <!-- Radar + insights -->
+        <div>
+          <div class="cl-chart-wrap" style="margin-bottom:14px">
+            <h4>Radar de perfil</h4>
+            <canvas id="clRadarChart" style="width:100%;height:220px"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fortalezas y debilidades -->
+      <div class="cl-grid2" style="margin-top:14px">
+        <div class="cl-insight-box">
+          <h4>🏆 Fortalezas (z &gt; 0.5)</h4>
+          <ul id="clDrillStrengths" style="margin:0;padding-left:16px;font-size:.82rem;line-height:1.7"></ul>
+        </div>
+        <div class="cl-insight-box">
+          <h4>⚠️ Debilidades (z &lt; −0.5)</h4>
+          <ul id="clDrillWeaknesses" style="margin:0;padding-left:16px;font-size:.82rem;line-height:1.7"></ul>
+        </div>
+      </div>
+
+      <!-- Estrategia -->
+      <div class="cl-strategy" id="clDrillStrategy"></div>
+
+      <!-- Insights accionables -->
+      <div class="cl-insight-box" style="margin-top:14px">
+        <h4>💡 Insights accionables</h4>
+        <ul id="clDrillInsights" style="margin:0;padding-left:16px;line-height:1.8"></ul>
+      </div>
+
+      <!-- Comparativa vs otros -->
+      <div class="cl-insight-box" style="margin-top:14px">
+        <h4>📈 Comparativa vs. otros segmentos</h4>
+        <p id="clDrillComparative" style="font-size:.82rem;margin:0;line-height:1.6"></p>
+      </div>
+
+      <!-- Audiencias representativas -->
+      <div style="margin-top:16px">
+        <h4 style="font-size:.88rem;color:#003791;margin-bottom:8px">👤 Audiencias más representativas de este cluster</h4>
+        <table class="cl-users-table">
+          <thead><tr id="clUsersHead"></tr></thead>
+          <tbody id="clUsersList"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   CLUSTERING DBSCAN MODULE — PlayStation Audience Analysis
+   ═══════════════════════════════════════════════════════════════ */
+
+// ── Estado del módulo ─────────────────────────────────────────
+let clState = {
+  rawData: [],        // Datos de audiencias (nombre + scores)
+  features: [],       // Nombres de features seleccionadas
+  X: [],              // Matriz de features (sin normalizar)
+  Xn: [],             // Matriz normalizada (StandardScaler)
+  labels: [],         // Etiquetas DBSCAN por audiencia
+  clusters: [],       // Info por cluster
+  pca2: [],           // Coords PCA 2D
+  eps: 0,
+  minSamples: 2,
+  silhouette: 0,
+  charts: {},         // Chart.js instances
+};
+
+// ── Colores PlayStation ────────────────────────────────────────
+const CL_COLORS = [
+  '#003791','#0070D1','#00A8E8','#00C896','#A78BFA',
+  '#F97316','#EC4899','#84CC16','#FFD93D','#F59E0B',
+  '#06B6D4','#1565C0','#0288D1','#009688','#4CAF50',
+];
+const CL_ANOM_COLOR = '#FF4444';
+
+function clGetColor(cid) {
+  if (cid === -1) return CL_ANOM_COLOR;
+  return CL_COLORS[cid % CL_COLORS.length];
+}
+
+// ── Toggle API config ─────────────────────────────────────────
+function clToggleEndpoint() {
+  const src = document.getElementById('clDataSource').value;
+  document.getElementById('clApiConfig').style.display = src === 'api' ? 'block' : 'none';
+}
+
+// ── Fetch desde API externa (simulado con fetch real) ─────────
+async function clFetchFromApi() {
+  const url = document.getElementById('clEndpointUrl').value.trim();
+  const key = document.getElementById('clApiKey').value.trim();
+  if (!url || !key) { clLog('❌ Necesitas URL y API Key para conectar.'); return; }
+
+  clLog('🌐 Conectando a: ' + url.split('?')[0] + '...');
+  try {
+    const resp = await fetch(url, {
+      headers: { 'Authorization': 'Bearer ' + key, 'Accept': 'application/json' }
+    });
+    clLog('   HTTP ' + resp.status);
+    if (!resp.ok) { clLog('❌ Error HTTP ' + resp.status); return; }
+    const data = await resp.json();
+    const arr = Array.isArray(data) ? data : (data.data || data.audiences || data.results || [data]);
+    clLog('✓ ' + arr.length + ' registros recibidos del endpoint');
+    // Convertir a formato interno
+    clState.rawData = arr.map((d, i) => ({
+      name: d.nombre || d.name || d.segmento_nombre || ('Audiencia ' + (i + 1)),
+      scores: {
+        PriceSensitivity:   +(d.precio_sensibilidad || d.price_sensitivity || d.gasto_en_store || 50),
+        CompetitionDrive:   +(d.competicion || d.competition_drive || d.frecuencia_online * 100 || 50),
+        TimeAvailable:      +(d.tiempo || d.time_available || d.horas_jugadas * 2 || 50),
+        SocialMotivation:   +(d.social || d.social_motivation || d.amigos_lista || 50),
+        TechTolerance:      +(d.tech || d.tech_tolerance || d.titulos_activos * 8 || 50),
+        StoryInterest:      +(d.historia || d.story_interest || d.trofeos / 5 || 50),
+        CollectingAffinity: +(d.coleccionismo || d.collecting_affinity || d.dlc_comprados * 5 || 50),
+        RiskAversion:       +(d.riesgo || d.risk_aversion || 50),
+      }
+    }));
+    clLog('✓ Datos listos para clustering (' + clState.rawData.length + ' audiencias)');
+  } catch (e) {
+    clLog('❌ Error de conexión: ' + e.message);
+  }
+}
+
+// ── Cargar audiencias internas ────────────────────────────────
+function clLoadInternal() {
+  clState.rawData = audienceProfiles.map(a => ({
+    name: a.name,
+    scores: { ...a.scores }
+  }));
+  clLog('✓ ' + clState.rawData.length + ' audiencias internas cargadas');
+}
+
+// ── Logging ───────────────────────────────────────────────────
+function clLog(msg) {
+  const el = document.getElementById('clLog');
+  el.innerHTML += '\n' + msg;
+  el.scrollTop = el.scrollHeight;
+}
+function clLogClear() {
+  document.getElementById('clLog').innerHTML = '';
+}
+
+// ── StandardScaler ────────────────────────────────────────────
+function clStandardScale(X) {
+  const n = X.length, m = X[0].length;
+  const means = Array(m).fill(0);
+  const stds  = Array(m).fill(0);
+
+  X.forEach(row => row.forEach((v, j) => means[j] += v));
+  means.forEach((s, j) => means[j] = s / n);
+
+  X.forEach(row => row.forEach((v, j) => stds[j] += (v - means[j]) ** 2));
+  stds.forEach((s, j) => stds[j] = Math.sqrt(s / n) || 1);
+
+  clLog('   StandardScaler: medias=[' + means.map(v => v.toFixed(1)).join(', ') + ']');
+  clLog('   StandardScaler: stds=[' + stds.map(v => v.toFixed(2)).join(', ') + ']');
+
+  return { Xn: X.map(row => row.map((v, j) => (v - means[j]) / stds[j])), means, stds };
+}
+
+// ── Distancia euclidiana ───────────────────────────────────────
+function clDist(a, b) {
+  return Math.sqrt(a.reduce((s, v, i) => s + (v - b[i]) ** 2, 0));
+}
+
+// ── k-distance graph + codo automático ────────────────────────
+function clAutoEps(Xn, k) {
+  const n = Xn.length;
+  const kActual = Math.min(k, n - 1);
+  const kdist = Xn.map((p, i) => {
+    const dists = Xn.map((q, j) => i === j ? Infinity : clDist(p, q)).sort((a, b) => a - b);
+    return dists[kActual - 1];
+  }).sort((a, b) => a - b);
+
+  // Punto de codo: máxima curvatura
+  const p1 = [0, kdist[0]], p2 = [n - 1, kdist[n - 1]];
+  const line = [p2[0] - p1[0], p2[1] - p1[1]];
+  const norm = Math.sqrt(line[0] ** 2 + line[1] ** 2) || 1;
+
+  let maxD = 0, elbowIdx = 0;
+  kdist.forEach((v, i) => {
+    const cross = Math.abs(line[0] * (p1[1] - v) - line[1] * (p1[0] - i));
+    const d = cross / norm;
+    if (d > maxD) { maxD = d; elbowIdx = i; }
+  });
+
+  return { eps: kdist[elbowIdx], kdist };
+}
+
+// ── DBSCAN puro JS ────────────────────────────────────────────
+function clDBSCAN(Xn, eps, minSamples) {
+  const n = Xn.length;
+  const labels = new Array(n).fill(-2); // -2 = no visitado
+  let cid = 0;
+
+  function neighbors(i) {
+    return Xn.map((_, j) => j).filter(j => j !== i && clDist(Xn[i], Xn[j]) <= eps);
+  }
+
+  for (let i = 0; i < n; i++) {
+    if (labels[i] !== -2) continue;
+    const nb = neighbors(i);
+    if (nb.length < minSamples) { labels[i] = -1; continue; }
+    labels[i] = cid;
+    const queue = [...nb];
+    while (queue.length) {
+      const q = queue.shift();
+      if (labels[q] === -1) labels[q] = cid;
+      if (labels[q] !== -2) continue;
+      labels[q] = cid;
+      const qnb = neighbors(q);
+      if (qnb.length >= minSamples) queue.push(...qnb.filter(x => labels[x] === -2));
+    }
+    cid++;
+  }
+  return labels;
+}
+
+// ── PCA 2D (covarianza → 2 eigenvecs aprox.) ──────────────────
+function clPCA2D(Xn) {
+  const n = Xn.length, m = Xn[0].length;
+  // Centrar (ya debería estar escalado, pero por si acaso)
+  const means = Array(m).fill(0);
+  Xn.forEach(r => r.forEach((v, j) => means[j] += v / n));
+  const Xc = Xn.map(r => r.map((v, j) => v - means[j]));
+
+  // Covarianza m×m
+  const cov = Array.from({length: m}, () => Array(m).fill(0));
+  Xc.forEach(r => r.forEach((v, i) => r.forEach((w, j) => cov[i][j] += v * w / n)));
+
+  // Power iteration para los 2 primeros vectores propios
+  function powerIter(C, iters = 100) {
+    let v = Array(m).fill(1);
+    for (let t = 0; t < iters; t++) {
+      let nv = Array(m).fill(0);
+      C.forEach((row, i) => row.forEach((c, j) => nv[i] += c * v[j]));
+      const norm = Math.sqrt(nv.reduce((s, x) => s + x * x, 0)) || 1;
+      v = nv.map(x => x / norm);
+    }
+    return v;
+  }
+  function deflate(C, v) {
+    return C.map((row, i) => row.map((c, j) => c - v[i] * v[j] * v.reduce((s, x, k) => s + C[k][j] * v[k], 0)));
+  }
+
+  const v1 = powerIter(cov);
+  const cov2 = deflate(cov, v1);
+  const v2 = powerIter(cov2);
+
+  return Xc.map(r => [
+    r.reduce((s, v, i) => s + v * v1[i], 0),
+    r.reduce((s, v, i) => s + v * v2[i], 0),
+  ]);
+}
+
+// ── Silhouette score simplificado ─────────────────────────────
+function clSilhouette(Xn, labels) {
+  const n = Xn.length;
+  const clIds = [...new Set(labels)].filter(c => c !== -1);
+  if (clIds.length < 2) return 0;
+
+  let totalSil = 0, count = 0;
+  labels.forEach((lbl, i) => {
+    if (lbl === -1) return;
+    const same = labels.map((l, j) => l === lbl && j !== i ? j : -1).filter(j => j >= 0);
+    const a = same.length ? same.reduce((s, j) => s + clDist(Xn[i], Xn[j]), 0) / same.length : 0;
+    let b = Infinity;
+    clIds.filter(c => c !== lbl).forEach(c => {
+      const diff = labels.map((l, j) => l === c ? j : -1).filter(j => j >= 0);
+      if (diff.length) {
+        const bd = diff.reduce((s, j) => s + clDist(Xn[i], Xn[j]), 0) / diff.length;
+        if (bd < b) b = bd;
+      }
+    });
+    const s = b === Infinity ? 0 : (b - a) / Math.max(a, b);
+    totalSil += s; count++;
+  });
+  return count ? totalSil / count : 0;
+}
+
+// ── MAIN: Ejecutar clustering ─────────────────────────────────
+function clRunClustering() {
+  clLogClear();
+  clLog('🎮 PlayStation Audience Clustering — DBSCAN');
+  clLog('━'.repeat(40));
+
+  // Cargar datos
+  const source = document.getElementById('clDataSource').value;
+  if (source === 'internal') {
+    clLoadInternal();
+  } else if (!clState.rawData.length) {
+    clLog('❌ No hay datos del API. Conecta primero con el botón "Conectar".');
+    return;
+  }
+
+  const data = clState.rawData;
+  if (data.length < 3) { clLog('❌ Necesitas al menos 3 audiencias.'); return; }
+
+  // Seleccionar features
+  const featureMap = {
+    clUsePriceSens: 'PriceSensitivity',
+    clUseCompDrive: 'CompetitionDrive',
+    clUseTimeAvail: 'TimeAvailable',
+    clUseSocial:    'SocialMotivation',
+    clUseTech:      'TechTolerance',
+    clUseStory:     'StoryInterest',
+    clUseCollect:   'CollectingAffinity',
+    clUseRisk:      'RiskAversion',
+  };
+  const feats = Object.entries(featureMap)
+    .filter(([id]) => document.getElementById(id).checked)
+    .map(([, f]) => f);
+
+  if (feats.length < 2) { clLog('❌ Selecciona al menos 2 métricas.'); return; }
+  clState.features = feats;
+  clLog('✓ Features: ' + feats.join(', '));
+
+  // Construir matriz X
+  const X = data.map(d => feats.map(f => +(d.scores[f] || 0)));
+  clState.X = X;
+
+  // StandardScaler (OBLIGATORIO)
+  clLog('\n🔧 Preprocesamiento — StandardScaler');
+  const { Xn, means, stds } = clStandardScale(X);
+  clState.Xn = Xn;
+  clState.means = means;
+  clState.stds = stds;
+
+  // Calcular eps dinámico
+  const minS = parseInt(document.getElementById('clMinSamples').value) || 2;
+  const epsManual = parseFloat(document.getElementById('clEpsManual').value) || 0;
+  const k = Math.max(2, minS);
+
+  clLog('\n📐 Calculando eps dinámico (k-distance, k=' + k + ')...');
+  const { eps: epsAuto, kdist } = clAutoEps(Xn, k);
+  const eps = epsManual > 0 ? epsManual : epsAuto;
+  clLog('   eps calculado: ' + epsAuto.toFixed(4) + (epsManual > 0 ? ' → usando manual: ' + epsManual : ' (auto)'));
+  clLog('   min_samples: ' + minS);
+
+  clState.eps = eps;
+  clState.minSamples = minS;
+
+  // Ejecutar DBSCAN con ajuste iterativo
+  clLog('\n🔮 Ejecutando DBSCAN...');
+  let labels, nClusters, pctNoise, bestLabels = null, bestSil = -1, bestEps = eps;
+
+  const factors = [1.0, 0.7, 1.5, 0.5, 2.0, 0.35, 2.5];
+  for (const f of factors) {
+    const epsT = eps * f;
+    labels = clDBSCAN(Xn, epsT, minS);
+    nClusters = new Set(labels.filter(l => l >= 0)).size;
+    pctNoise = labels.filter(l => l === -1).length / labels.length;
+    const validLabels = labels.filter(l => l >= 0);
+    const validXn = Xn.filter((_, i) => labels[i] >= 0);
+    const sil = nClusters >= 2 ? clSilhouette(validXn, validLabels) : 0;
+    clLog('   eps=' + epsT.toFixed(4) + ': ' + nClusters + ' clusters | ruido=' + (pctNoise * 100).toFixed(0) + '% | sil=' + sil.toFixed(3));
+    if (nClusters >= 2 && pctNoise <= 0.4 && sil > bestSil) {
+      bestSil = sil; bestLabels = [...labels]; bestEps = epsT;
+    }
+  }
+
+  if (!bestLabels || new Set(bestLabels.filter(l => l >= 0)).size < 2) {
+    clLog('\n⚠ DBSCAN no convergió. Forzando K=3 con asignación por distancia...');
+    bestLabels = clKMeans3(Xn);
+    bestSil = clSilhouette(Xn, bestLabels);
+    bestEps = 0;
+  }
+
+  clState.labels = bestLabels;
+  clState.eps = bestEps;
+  clState.silhouette = bestSil;
+
+  const clIds = [...new Set(bestLabels.filter(l => l >= 0))].sort();
+  const nAnom = bestLabels.filter(l => l === -1).length;
+
+  clLog('\n✓ Algoritmo: DBSCAN (eps=' + bestEps.toFixed(4) + ')');
+  clLog('  Clusters: ' + clIds.length + ' | Anomalías: ' + nAnom + ' | Silhouette: ' + bestSil.toFixed(3));
+
+  // PCA 2D
+  clState.pca2 = clPCA2D(Xn);
+
+  // Perfilar clusters
+  clState.clusters = clProfileClusters(data, bestLabels, X, Xn, feats, clIds);
+
+  // Actualizar UI
+  clUpdateKPIs(clIds.length, data.length, bestSil, bestEps, nAnom);
+  clDrawCharts(data, bestLabels, clState.pca2, clIds, feats, X, Xn);
+  clBuildSegCards(clState.clusters, nAnom, data, bestLabels);
+
+  document.getElementById('clResultsStep').style.display = 'block';
+  document.getElementById('clSelectStep').style.display = 'block';
+  document.getElementById('clDrillStep').style.display = 'none';
+
+  clLog('\n📋 Listo. Elige un segmento en el Paso 3 para análisis detallado.');
+}
+
+// ── K-Means simple K=3 (fallback) ─────────────────────────────
+function clKMeans3(Xn) {
+  const n = Xn.length, K = Math.min(3, n);
+  let centroids = Xn.slice(0, K).map(r => [...r]);
+  let labels = new Array(n).fill(0);
+  for (let iter = 0; iter < 30; iter++) {
+    labels = Xn.map(p => {
+      let best = 0, bd = Infinity;
+      centroids.forEach((c, k) => { const d = clDist(p, c); if (d < bd) { bd = d; best = k; } });
+      return best;
+    });
+    centroids = centroids.map((_, k) => {
+      const pts = Xn.filter((_, i) => labels[i] === k);
+      if (!pts.length) return centroids[k];
+      return pts[0].map((_, j) => pts.reduce((s, r) => s + r[j], 0) / pts.length);
+    });
+  }
+  return labels;
+}
+
+// ── Perfilar clusters ──────────────────────────────────────────
+function clProfileClusters(data, labels, X, Xn, feats, clIds) {
+  const globalMeans = feats.map((_, j) => X.map(r => r[j]).reduce((s, v) => s + v, 0) / X.length);
+  const globalStds  = feats.map((_, j) => {
+    const m = globalMeans[j];
+    return Math.sqrt(X.map(r => (r[j] - m) ** 2).reduce((s, v) => s + v, 0) / X.length) || 1;
+  });
+
+  const allCids = [...clIds, -1];
+  return allCids.map(cid => {
+    const idxs = labels.map((l, i) => l === cid ? i : -1).filter(i => i >= 0);
+    if (!idxs.length) return null;
+
+    const Xseg = idxs.map(i => X[i]);
+    const segMeans = feats.map((_, j) => Xseg.map(r => r[j]).reduce((s, v) => s + v, 0) / Xseg.length);
+    const segStds  = feats.map((_, j) => {
+      const m = segMeans[j];
+      return Math.sqrt(Xseg.map(r => (r[j] - m) ** 2).reduce((s, v) => s + v, 0) / Xseg.length) || 0;
+    });
+    const zScores = feats.map((_, j) => (segMeans[j] - globalMeans[j]) / globalStds[j]);
+    const diffPct = feats.map((_, j) => globalMeans[j] ? ((segMeans[j] - globalMeans[j]) / globalMeans[j] * 100) : 0);
+
+    const topZIdx = zScores.reduce((bi, v, i) => Math.abs(v) > Math.abs(zScores[bi]) ? i : bi, 0);
+
+    // Audiencias más cercanas al centroide (Xn)
+    const centroid = feats.map((_, j) => Xn.filter((_, i) => labels[i] === cid).map(r => r[j]).reduce((s, v) => s + v, 0) / idxs.length);
+    const sorted = idxs.map(i => ({ i, d: clDist(Xn[i], centroid) })).sort((a, b) => a.d - b.d);
+
+    // Silhouette por cluster
+    const validLabels = labels.filter(l => l >= 0);
+    const validXn = Xn.filter((_, i) => labels[i] >= 0);
+    const clIds2 = [...new Set(validLabels)];
+    let silCluster = 0;
+    if (cid >= 0 && clIds2.length >= 2) {
+      const segXn = Xn.filter((_, i) => labels[i] === cid);
+      const allSils = segXn.map(p => {
+        const sameDists = segXn.filter(q => q !== p).map(q => clDist(p, q));
+        const a = sameDists.length ? sameDists.reduce((s, v) => s + v, 0) / sameDists.length : 0;
+        let b = Infinity;
+        clIds2.filter(c => c !== cid).forEach(c => {
+          const otherXn = Xn.filter((_, i) => labels[i] === c);
+          const bd = otherXn.reduce((s, q) => s + clDist(p, q), 0) / (otherXn.length || 1);
+          if (bd < b) b = bd;
+        });
+        return b === Infinity ? 0 : (b - a) / Math.max(a, b);
+      });
+      silCluster = allSils.reduce((s, v) => s + v, 0) / (allSils.length || 1);
+    }
+
+    return {
+      cid,
+      isAnomaly: cid === -1,
+      n: idxs.length,
+      pct: (idxs.length / labels.length * 100).toFixed(1),
+      members: sorted.slice(0, 5).map(({ i }) => data[i].name),
+      allMembers: idxs.map(i => data[i].name),
+      segMeans, segStds, globalMeans, globalStds, zScores, diffPct,
+      topVar: feats[topZIdx],
+      topZ: zScores[topZIdx],
+      color: clGetColor(cid),
+      silhouette: silCluster,
+    };
+  }).filter(Boolean);
+}
+
+// ── Actualizar KPIs ────────────────────────────────────────────
+function clUpdateKPIs(nCl, nTotal, sil, eps, nAnom) {
+  document.getElementById('clKpiClusters').textContent = nCl;
+  document.getElementById('clKpiTotal').textContent = nTotal;
+  document.getElementById('clKpiSil').textContent = sil.toFixed(3);
+  document.getElementById('clKpiEps').textContent = eps ? eps.toFixed(3) : 'K=3 FB';
+  document.getElementById('clKpiAnom').textContent = nAnom;
+}
+
+// ── Destruir chart si existe ───────────────────────────────────
+function clDestroyChart(key) {
+  if (clState.charts[key]) { clState.charts[key].destroy(); delete clState.charts[key]; }
+}
+
+// ── Dibujar gráficos ─────────────────────────────────────────
+function clDrawCharts(data, labels, pca2, clIds, feats, X, Xn) {
+  // Solo scatter; bar/heat/sil siguen existiendo para drilldown pero no se muestran
+  clDrawScatter(data, labels, pca2, clIds);
+}
+
+// Scatter PCA 2D — con modo de coloreo seleccionable
+function clDrawScatter(data, labels, pca2, clIds, colorMode) {
+  clDestroyChart('scatter');
+  if (!colorMode) colorMode = (document.getElementById('clColorMode')?.value || 'cluster');
+
+  const allCids = labels.includes(-1) ? [...clIds, -1] : clIds;
+  let datasets, legendHTML = '';
+
+  if (colorMode === 'cluster') {
+    // Colorear por cluster (comportamiento original)
+    const dsMap = {};
+    allCids.forEach(c => dsMap[c] = []);
+    pca2.forEach((p, i) => dsMap[labels[i]]?.push({ x: p[0], y: p[1], label: data[i].name }));
+    datasets = allCids.map(cid => ({
+      label: cid === -1 ? 'Anomalías ⚠️' : ('Seg ' + (cid + 1)),
+      data: dsMap[cid],
+      backgroundColor: clGetColor(cid) + 'dd',
+      borderColor: clGetColor(cid),
+      pointRadius: 7, pointHoverRadius: 10, borderWidth: 1.5,
+    }));
+    legendHTML = allCids.map(cid => `
+      <div style="display:flex;align-items:center;gap:4px;">
+        <div style="width:10px;height:10px;border-radius:50%;background:${clGetColor(cid)};flex-shrink:0"></div>
+        <span>${cid === -1 ? 'Anomalías ⚠️' : 'Seg ' + (cid + 1)}</span>
+      </div>`).join('');
+  } else {
+    // Colorear por valor de una feature (gradiente azul→rojo)
+    const featIdx = clState.features.indexOf(colorMode);
+    const vals = featIdx >= 0 ? data.map(d => +(d.scores[colorMode] || 0)) : data.map(() => 50);
+    const minV = Math.min(...vals), maxV = Math.max(...vals), rangeV = (maxV - minV) || 1;
+
+    function valToColor(v) {
+      const t = (v - minV) / rangeV; // 0=bajo, 1=alto
+      const r = Math.round(30 + t * 173);
+      const g = Math.round(135 - t * 120);
+      const b = Math.round(209 - t * 183);
+      return `rgb(${r},${g},${b})`;
+    }
+
+    const points = pca2.map((p, i) => ({
+      x: p[0], y: p[1],
+      label: data[i].name,
+      val: vals[i],
+      color: valToColor(vals[i]),
+    }));
+
+    // Un dataset por punto (Chart.js scatter necesita color por punto via un truco)
+    // Usamos un solo dataset con colores distintos via backgroundColor array
+    datasets = [{
+      label: colorMode.replace(/([A-Z])/g, ' $1').trim(),
+      data: points.map(p => ({ x: p.x, y: p.y, label: p.label, val: p.val })),
+      backgroundColor: points.map(p => p.color + 'cc'),
+      borderColor: points.map(p => p.color),
+      pointRadius: 7, pointHoverRadius: 10, borderWidth: 1.5,
+    }];
+
+    // Gradiente legend
+    legendHTML = `
+      <div style="display:flex;align-items:center;gap:8px;width:100%;">
+        <span style="color:#6688bb">${minV.toFixed(0)}</span>
+        <div style="flex:1;height:8px;border-radius:4px;background:linear-gradient(to right,rgb(30,135,209),rgb(203,15,26))"></div>
+        <span style="color:#6688bb">${maxV.toFixed(0)}</span>
+        <span style="color:#003791;font-weight:600;font-size:.78rem">${colorMode.replace(/([A-Z])/g, ' $1').trim()}</span>
+      </div>`;
+  }
+
+  const legendEl = document.getElementById('clScatterLegend');
+  if (legendEl) legendEl.innerHTML = legendHTML;
+
+  clState.charts.scatter = new Chart(document.getElementById('clScatterChart'), {
+    type: 'scatter',
+    data: { datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: colorMode === 'cluster', position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } },
+        tooltip: { callbacks: {
+          label: ctx => {
+            const raw = ctx.raw;
+            const base = raw.label + ' (' + ctx.parsed.x.toFixed(2) + ', ' + ctx.parsed.y.toFixed(2) + ')';
+            return raw.val != null ? base + ' · ' + colorMode.replace(/([A-Z])/g, ' $1').trim() + ': ' + raw.val : base;
+          }
+        }}
+      },
+      scales: {
+        x: { title: { display: true, text: 'PC1' }, grid: { color: '#e8eef8' } },
+        y: { title: { display: true, text: 'PC2' }, grid: { color: '#e8eef8' } },
+      }
+    }
+  });
+}
+
+// Actualizar scatter al cambiar el selector
+function clUpdateScatterColor() {
+  if (!clState.labels.length) return;
+  const mode = document.getElementById('clColorMode').value;
+  const clIds = clState.clusters.filter(c => !c.isAnomaly).map(c => c.cid);
+  clDrawScatter(clState.rawData, clState.labels, clState.pca2, clIds, mode);
+}
+
+// Bar distribución
+function clDrawBar(clIds, labels, total) {
+  clDestroyChart('bar');
+  const allCids = labels.includes(-1) ? [...clIds, -1] : clIds;
+  clState.charts.bar = new Chart(document.getElementById('clBarChart'), {
+    type: 'bar',
+    data: {
+      labels: allCids.map(c => c === -1 ? 'Anomalías' : 'Seg ' + (c + 1)),
+      datasets: [{
+        label: 'Audiencias',
+        data: allCids.map(c => labels.filter(l => l === c).length),
+        backgroundColor: allCids.map(c => clGetColor(c) + 'cc'),
+        borderColor: allCids.map(c => clGetColor(c)),
+        borderWidth: 1.5, borderRadius: 8,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: '#e8eef8' }, ticks: { stepSize: 1 } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+// Heatmap Z-scores
+function clDrawHeatmap(feats, clIds, labels, X, Xn) {
+  clDestroyChart('heat');
+  const globalMeans = feats.map((_, j) => X.map(r => r[j]).reduce((s, v) => s + v, 0) / X.length);
+  const globalStds  = feats.map((_, j) => {
+    const m = globalMeans[j];
+    return Math.sqrt(X.map(r => (r[j] - m) ** 2).reduce((s, v) => s + v, 0) / X.length) || 1;
+  });
+  const datasets = clIds.map((cid, ci) => {
+    const Xseg = X.filter((_, i) => labels[i] === cid);
+    const sm = feats.map((_, j) => Xseg.reduce((s, r) => s + r[j], 0) / (Xseg.length || 1));
+    return {
+      label: 'Seg ' + (cid + 1),
+      data: feats.map((_, j) => +((sm[j] - globalMeans[j]) / globalStds[j]).toFixed(2)),
+      backgroundColor: clGetColor(cid) + '99',
+      borderColor: clGetColor(cid),
+      borderWidth: 1.5, borderRadius: 6,
+    };
+  });
+  clState.charts.heat = new Chart(document.getElementById('clHeatChart'), {
+    type: 'bar',
+    data: { labels: feats.map(f => f.replace(/([A-Z])/g, ' $1').trim()), datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } },
+      scales: {
+        x: { grid: { color: '#e8eef8' }, ticks: { font: { size: 10 } } },
+        y: { title: { display: true, text: 'Z-score' }, grid: { color: '#e8eef8' } }
+      }
+    }
+  });
+}
+
+// Silhouette bar
+function clDrawSilBar(clIds) {
+  clDestroyChart('sil');
+  const silData = clIds.map(cid => {
+    const c = clState.clusters.find(c => c.cid === cid);
+    return c ? c.silhouette : 0;
+  });
+  clState.charts.sil = new Chart(document.getElementById('clSilChart'), {
+    type: 'bar',
+    data: {
+      labels: clIds.map(c => 'Seg ' + (c + 1)),
+      datasets: [{
+        label: 'Silhouette',
+        data: silData.map(v => +v.toFixed(3)),
+        backgroundColor: silData.map(v => v > 0.4 ? '#00C896cc' : v > 0.25 ? '#FFD93Dcc' : '#FF6B6Bcc'),
+        borderRadius: 8, borderWidth: 1.5,
+        borderColor: silData.map(v => v > 0.4 ? '#00C896' : v > 0.25 ? '#FFD93D' : '#FF6B6B'),
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false },
+        annotation: { annotations: {
+          line1: { type: 'line', yMin: 0.5, yMax: 0.5, borderColor: '#00C896', borderWidth: 1, borderDash: [4, 4] },
+          line2: { type: 'line', yMin: 0.3, yMax: 0.3, borderColor: '#FFD93D', borderWidth: 1, borderDash: [4, 4] },
+        }}
+      },
+      scales: {
+        y: { min: -0.1, max: 1, grid: { color: '#e8eef8' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+// ── Tarjetas de segmentos ─────────────────────────────────────
+function clBuildSegCards(clusters, nAnom, data, labels) {
+  const container = document.getElementById('clSegCards');
+  container.innerHTML = '';
+  clusters.forEach(cl => {
+    const card = document.createElement('div');
+    card.className = 'cl-seg-card';
+    card.style.borderColor = cl.color;
+    card.dataset.cid = cl.cid;
+
+    const topFeats = cl.zScores
+      .map((z, i) => ({ f: clState.features[i], z }))
+      .sort((a, b) => Math.abs(b.z) - Math.abs(a.z))
+      .slice(0, 4);
+
+    const featBars = topFeats.map(({ f, z }) => {
+      const pct = Math.min(100, Math.abs(z) / 2 * 100);
+      const color = z > 0.5 ? cl.color : (z < -0.5 ? '#FF6B6B' : '#aab8cc');
+      return `<div class="seg-bar-row">
+        <span style="width:110px;flex-shrink:0;font-size:.68rem">${f.replace(/([A-Z])/g, ' $1').trim()}</span>
+        <div class="seg-bar-bg"><div class="seg-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+        <span style="width:32px;text-align:right;font-size:.68rem">${z > 0 ? '+' : ''}${z.toFixed(1)}σ</span>
+      </div>`;
+    }).join('');
+
+    card.innerHTML = `
+      <div class="seg-name" style="color:${cl.color}">
+        ${cl.isAnomaly ? '⚠️ Comportamientos Anómalos' : '🎮 Segmento ' + (cl.cid + 1)}
+      </div>
+      <div class="seg-meta">${cl.n} audiencias · ${cl.pct}% del total${cl.isAnomaly ? ' · <b>REVISAR</b>' : ''}</div>
+      <div class="seg-meta" style="margin-bottom:8px">Variable clave: <b>${cl.topVar.replace(/([A-Z])/g, ' $1').trim()}</b></div>
+      ${featBars}
+      <div class="seg-meta" style="margin-top:8px">Incluye: <i>${cl.members.slice(0, 3).join(', ')}${cl.members.length > 3 ? '...' : ''}</i></div>
+    `;
+    card.onclick = () => clShowDrilldown(cl.cid);
+    container.appendChild(card);
+  });
+}
+
+// ── Drilldown detallado ───────────────────────────────────────
+function clShowDrilldown(cid) {
+  // Marcar tarjeta activa
+  document.querySelectorAll('.cl-seg-card').forEach(c => c.classList.remove('selected'));
+  const activeCard = document.querySelector(`.cl-seg-card[data-cid="${cid}"]`);
+  if (activeCard) {
+    activeCard.classList.add('selected');
+    activeCard.style.borderColor = clGetColor(cid);
+    activeCard.style.boxShadow = '0 0 0 3px ' + clGetColor(cid) + '44';
+  }
+
+  const cl = clState.clusters.find(c => c.cid === cid);
+  if (!cl) return;
+
+  const feats = clState.features;
+  const color = cl.color;
+
+  // Header
+  document.getElementById('clDrillTitle').textContent =
+    (cl.isAnomaly ? '⚠️ Comportamientos Anómalos' : '🎮 Segmento ' + (cid + 1)) + ' — Análisis Detallado';
+  document.getElementById('clDrillN').textContent = cl.n;
+  document.getElementById('clDrillPct').textContent = cl.pct + '%';
+  document.getElementById('clDrillVar').textContent = cl.topVar.replace(/([A-Z])/g, ' $1').trim();
+
+  // Tabla estadística
+  const tbody = document.getElementById('clDrillTable');
+  tbody.innerHTML = feats.map((f, j) => {
+    const z = cl.zScores[j];
+    const diff = cl.diffPct[j];
+    const zClass = z > 0.5 ? 'cl-z-high' : (z < -0.5 ? 'cl-z-low' : 'cl-z-mid');
+    const diffStr = (diff >= 0 ? '+' : '') + diff.toFixed(1) + '%';
+    const pct = Math.min(100, Math.abs(z) / 2 * 100);
+    return `<tr>
+      <td>${f.replace(/([A-Z])/g, ' $1').trim()}</td>
+      <td><b>${cl.segMeans[j].toFixed(1)}</b><div class="cl-progress"><div class="cl-progress-fill" style="width:${cl.segMeans[j]}%;background:${color}"></div></div></td>
+      <td>${cl.globalMeans[j].toFixed(1)}</td>
+      <td style="color:${diff >= 0 ? '#0070D1' : '#cc2200'}">${diffStr}</td>
+      <td><span class="cl-z-pill ${zClass}">${z >= 0 ? '+' : ''}${z.toFixed(2)}σ</span></td>
+    </tr>`;
+  }).join('');
+
+  // Fortalezas y debilidades
+  const fortalezas = feats.map((f, j) => ({ f, z: cl.zScores[j] })).filter(x => x.z > 0.5).sort((a, b) => b.z - a.z);
+  const debilidades = feats.map((f, j) => ({ f, z: cl.zScores[j] })).filter(x => x.z < -0.5).sort((a, b) => a.z - b.z);
+
+  const strMap = {
+    PriceSensitivity: { h: 'Alta sensibilidad al precio — oportunidad con descuentos', l: 'Baja sensibilidad — dispuestos a pagar premium' },
+    CompetitionDrive: { h: 'Muy competitivos — torneos y ranked los activan', l: 'Poco competitivos — prefieren experiencias narrativas' },
+    TimeAvailable: { h: 'Alto tiempo disponible — sesiones largas y profundas', l: 'Poco tiempo — necesitan sesiones cortas y rápidas' },
+    SocialMotivation: { h: 'Altamente sociales — comunidad y co-op los fidelizan', l: 'Solitarios — prefieren experiencias single-player' },
+    TechTolerance: { h: 'Alta tolerancia tech — valoran specs y features avanzados', l: 'Baja tolerancia tech — necesitan UX simple y directa' },
+    StoryInterest: { h: 'Alto interés narrativo — exclusivos con historia profunda', l: 'Poco interés en historia — prefieren mecánicas y acción' },
+    CollectingAffinity: { h: 'Coleccionistas activos — ediciones limitadas y drops exclusivos', l: 'No coleccionan — solo contenido base sin extras físicos' },
+    RiskAversion: { h: 'Alta aversión al riesgo — necesitan certeza antes de comprar', l: 'Toleran el riesgo — early adopters, compran en preventa' },
+  };
+
+  document.getElementById('clDrillStrengths').innerHTML = fortalezas.length
+    ? fortalezas.slice(0, 4).map(({ f, z }) => `<li><b>${f.replace(/([A-Z])/g, ' $1').trim()}</b> (${z >= 0 ? '+' : ''}${z.toFixed(2)}σ) — ${strMap[f]?.h || 'por encima del promedio'}</li>`).join('')
+    : '<li style="color:#aaa">Sin fortalezas destacadas en este segmento.</li>';
+
+  document.getElementById('clDrillWeaknesses').innerHTML = debilidades.length
+    ? debilidades.slice(0, 4).map(({ f, z }) => `<li><b>${f.replace(/([A-Z])/g, ' $1').trim()}</b> (${z.toFixed(2)}σ) — ${strMap[f]?.l || 'por debajo del promedio'}</li>`).join('')
+    : '<li style="color:#aaa">Sin debilidades destacadas — perfil balanceado.</li>';
+
+  // Estrategia
+  const estrategia = clGetStrategy(cl, feats);
+  document.getElementById('clDrillStrategy').innerHTML = `
+    <b>🎯 Estrategia de activación — ${estrategia.objetivo}</b>
+    <div style="margin-top:8px">Canal: <b>${estrategia.canal}</b></div>
+    <div>KPI clave: <b>${estrategia.kpi}</b></div>
+    <div>Urgencia: <b>${estrategia.urgencia}</b></div>
+    <div style="margin-top:8px;opacity:.9">${estrategia.accion}</div>
+  `;
+
+  // Insights accionables
+  document.getElementById('clDrillInsights').innerHTML = clGetInsights(cl, feats)
+    .map(i => `<li>${i}</li>`).join('');
+
+  // Comparativa
+  const lidera = feats.filter((_, j) => {
+    const myVal = cl.segMeans[j];
+    return clState.clusters.filter(c => !c.isAnomaly && c.cid !== cid).every(c => myVal >= c.segMeans[j]);
+  }).map(f => f.replace(/([A-Z])/g, ' $1').trim());
+  const bajo = feats.filter((_, j) => {
+    const myVal = cl.segMeans[j];
+    return clState.clusters.filter(c => !c.isAnomaly && c.cid !== cid).every(c => myVal <= c.segMeans[j]);
+  }).map(f => f.replace(/([A-Z])/g, ' $1').trim());
+
+  document.getElementById('clDrillComparative').innerHTML =
+    (lidera.length ? `✅ <b>Lidera</b> vs. todos los segmentos en: <b>${lidera.join(', ')}</b><br>` : '') +
+    (bajo.length ? `📉 <b>Por debajo</b> de todos en: <b>${bajo.join(', ')}</b>` : '') +
+    (!lidera.length && !bajo.length ? 'Perfil intermedio — no lidera ni está por debajo de todos los demás en ninguna variable.' : '');
+
+  // Radar
+  clDestroyChart('radar');
+  const radarVals = feats.map((_, j) => Math.min(100, Math.max(0, cl.segMeans[j])));
+  const globalVals = feats.map((_, j) => Math.min(100, Math.max(0, cl.globalMeans[j])));
+  clState.charts.radar = new Chart(document.getElementById('clRadarChart'), {
+    type: 'radar',
+    data: {
+      labels: feats.map(f => f.replace(/([A-Z])/g, ' $1').trim()),
+      datasets: [
+        { label: 'Este segmento', data: radarVals, backgroundColor: color + '33', borderColor: color, pointBackgroundColor: color, borderWidth: 2 },
+        { label: 'Promedio total', data: globalVals, backgroundColor: '#aab8cc22', borderColor: '#aab8cc', pointBackgroundColor: '#aab8cc', borderWidth: 1.5, borderDash: [4, 4] },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { r: { min: 0, max: 100, ticks: { stepSize: 25, font: { size: 9 } }, pointLabels: { font: { size: 10 } }, grid: { color: '#e8eef8' } } },
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } }
+    }
+  });
+
+  // Usuarios representativos (top 5 miembros)
+  const headRow = document.getElementById('clUsersHead');
+  headRow.innerHTML = '<th>Audiencia</th>' + feats.slice(0, 5).map(f => `<th>${f.replace(/([A-Z])/g, ' $1').trim()}</th>`).join('') + '<th>Tipo</th>';
+  const tbody2 = document.getElementById('clUsersList');
+  tbody2.innerHTML = cl.members.map(name => {
+    const d = clState.rawData.find(r => r.name === name);
+    if (!d) return '';
+    const vals = feats.slice(0, 5).map(f => `<td>${d.scores[f] ?? '—'}</td>`).join('');
+    return `<tr><td><b>${name}</b></td>${vals}<td>${cl.isAnomaly ? '<span class="cl-badge-anom">⚠️ Revisar</span>' : '<span class="cl-badge-ok">✓ Normal</span>'}</td></tr>`;
+  }).join('');
+
+  document.getElementById('clDrillStep').style.display = 'block';
+  document.getElementById('clDrillStep').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function clCloseDrill() {
+  document.getElementById('clDrillStep').style.display = 'none';
+  document.querySelectorAll('.cl-seg-card').forEach(c => { c.classList.remove('selected'); c.style.boxShadow = ''; });
+}
+
+// ── Estrategia por perfil ─────────────────────────────────────
+function clGetStrategy(cl, feats) {
+  if (cl.isAnomaly) return {
+    objetivo: 'Investigación y control',
+    canal: 'Revisión interna — NO campañas de marketing',
+    kpi: 'Tasa de resolución de casos / bans',
+    urgencia: '🔴 ALTA',
+    accion: 'Revisar cuentas manualmente. Investigar posibles bots o farming scripts. Considerar restricción preventiva.'
+  };
+  const zi = (f) => { const j = feats.indexOf(f); return j >= 0 ? cl.zScores[j] : 0; };
+  if (zi('PriceSensitivity') > 1) return { objetivo: 'Retención con valor percibido', canal: 'PS Store + Email + Notificaciones push', kpi: 'ARPU, tasa de compra por oferta', urgencia: '🟡 MEDIA', accion: 'Descuentos exclusivos, PS Plus a precio reducido y bundles con demos. Comunicación centrada en precio/valor.' };
+  if (zi('CompetitionDrive') > 1) return { objetivo: 'Monetización competitiva', canal: 'Discord + Twitch + in-game tournaments', kpi: 'LTV, tasa de participación en torneos', urgencia: '🟢 NORMAL', accion: 'Torneos online patrocinados, ranked rewards y betas exclusivas. Partnerships con equipos de eSports.' };
+  if (zi('SocialMotivation') > 1) return { objetivo: 'Amplificación orgánica', canal: 'TikTok + Instagram + PS Creator Program', kpi: 'Reach orgánico, nuevos registros por referido', urgencia: '🟢 NORMAL', accion: 'Programa de embajadores, kits de contenido y features de sharing mejorados. Co-op challenges virales.' };
+  if (zi('CollectingAffinity') > 1) return { objetivo: 'Monetización de exclusividad', canal: 'Email + Web / PS Store + Newsletters', kpi: 'Conversión en drops, AOV', urgencia: '🟡 MEDIA', accion: 'Ediciones limitadas, drops temporales con countdown y contenido de colección certificado.' };
+  if (zi('StoryInterest') > 1) return { objetivo: 'Fidelización narrativa', canal: 'YouTube + Web Reviews + PS Plus Extra', kpi: 'Completion rate, tiempo en juego', urgencia: '🟢 NORMAL', accion: 'Comunicación centrada en narrativa y lore. DLC de historia, exclusivos single-player de calidad.' };
+  return { objetivo: 'Nurturing y crecimiento de engagement', canal: 'Email + PS App + In-game', kpi: 'Sesiones semanales, conversión a compra', urgencia: '🟢 NORMAL', accion: 'Contenido personalizado según hábitos. Recompensas por progreso y campañas de reactivación moderada.' };
+}
+
+// ── Insights accionables ──────────────────────────────────────
+function clGetInsights(cl, feats) {
+  const insights = [];
+  const zi = (f) => { const j = feats.indexOf(f); return j >= 0 ? cl.zScores[j] : 0; };
+  const gv = (f) => { const j = feats.indexOf(f); return j >= 0 ? cl.globalMeans[j] : 0; };
+  const sv = (f) => { const j = feats.indexOf(f); return j >= 0 ? cl.segMeans[j] : 0; };
+
+  if (cl.isAnomaly) {
+    insights.push('Revisar cuentas manualmente antes de cualquier acción de marketing.');
+    insights.push('Implementar detección automática de patrones anómalos en tiempo real.');
+    return insights;
+  }
+  if (zi('PriceSensitivity') > 1 && zi('CompetitionDrive') < 0)
+    insights.push(`Alta sensibilidad al precio (${sv('PriceSensitivity').toFixed(0)} vs. avg ${gv('PriceSensitivity').toFixed(0)}): activar con PS Plus a precio reducido o bundles económicos.`);
+  if (zi('CompetitionDrive') > 0.8 && zi('SocialMotivation') > 0.5)
+    insights.push(`Perfil competitivo-social: torneos con recompensas públicas y rankings visibles aumentan retención y LTV.`);
+  if (zi('CollectingAffinity') > 1 && zi('PriceSensitivity') < 0)
+    insights.push(`Coleccionistas con bajo price-sensitivity (${sv('PriceSensitivity').toFixed(0)} pts): máxima oportunidad para ediciones premium y drops escasos.`);
+  if (zi('StoryInterest') > 0.8 && zi('CompetitionDrive') < 0)
+    insights.push(`Alto interés narrativo, bajo perfil competitivo: exclusivos de historia y RPGs son la palanca principal de compra.`);
+  if (zi('TechTolerance') < -0.8)
+    insights.push(`Baja tolerancia tech: simplificar el onboarding y reducir fricción en el checkout reduce churn en este segmento.`);
+  if (zi('SocialMotivation') > 1)
+    insights.push(`Muy sociales (${sv('SocialMotivation').toFixed(0)} pts): el boca a boca y features cooperativas son el canal más eficiente — invertir en referral.`);
+  if (!insights.length)
+    insights.push(`Perfil balanceado sin extremos claros: probar comunicación multicanal y medir respuesta antes de apostar por un eje.`);
+  return insights.slice(0, 4);
+}
+
+
+</script>
+
+</body>
+</html>
